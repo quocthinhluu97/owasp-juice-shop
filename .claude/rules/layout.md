@@ -7,7 +7,7 @@
   agents/                 subagents (researcher.md: read-only research; code-reviewer.md: review, no edits)
 app/                      Juice Shop source (vendored at a pinned tag) + Dockerfile
 .github/workflows/
-  security.yml            build → scan jobs → triage gate
+  security.yml            build → scan jobs → triage gate (exists: build job only)
   deploy.yml              (optional) OIDC-authenticated deploy, final phase only
 .github/dependabot.yml    keeps pinned action SHAs and base images up to date
 triage/

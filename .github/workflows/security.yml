@@ -1,0 +1,28 @@
+# Phase 1: build the Juice Shop image and nothing else.
+# Scan jobs (phases 2-6) and the triage gate (phase 7) are added one at a time.
+#
+# Deliberately not hardened yet: actions use version tags (not commit SHAs), checkout keeps its
+# credentials, and there is no concurrency group. These are fixed in phase 9
+# (.claude/rules/ci-workflows.md). Phase 5 will show which of them Checkov actually flags; tag
+# pinning and persisted credentials may need zizmor instead (not yet verified).
+# timeout-minutes is set now: the default is 360 minutes, and a hung npm install would burn them.
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build image
+        run: docker build -t juice-shop:ci ./app
