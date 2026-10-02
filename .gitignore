@@ -1,0 +1,10 @@
+# Raw scanner output can contain secrets and scanned-code strings. Never commit it.
+reports/
+
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Cached CISA KEV / EPSS feeds (phase 7)
+triage/.cache/
