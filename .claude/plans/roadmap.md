@@ -8,8 +8,8 @@ Status: ✅ done · ▶ in progress · ☐ not started
 | # | Phase | Status |
 |---|---|---|
 | 0 | Setup: Docker, git repo, vendor Juice Shop | ✅ |
-| 1 | App + Dockerfile + minimal workflow | ▶ |
-| 2 | Gitleaks: secrets in git history | ☐ |
+| 1 | App + Dockerfile + minimal workflow | ✅ |
+| 2 | Gitleaks: secrets in git history | ▶ |
 | 3 | Trivy: vulnerable packages in image and repo | ☐ |
 | 4 | Semgrep: insecure code patterns | ☐ |
 | 5 | Checkov: Dockerfile and workflow misconfiguration | ☐ |
@@ -48,7 +48,7 @@ Learned along the way (feeds later phases):
 - There's **no lockfile** (`.npmrc`: `package-lock=false`), so dependency versions float between builds. This matters for Trivy.
 - Upstream's `postinstall` runs `build:server || cd .`, so a failed server compile does not fail `docker build`. This matters for phase 1's smoke test.
 
-## Phase 1: App + minimal workflow ▶
+## Phase 1: App + minimal workflow ✅
 
 Goal: the image builds in CI and nothing else happens.
 
@@ -56,11 +56,11 @@ Goal: the image builds in CI and nothing else happens.
 2. ✅ `docker build -t juice-shop:local ./app`: **102 s, 513 MB on disk / 115 MB compressed**. First attempt failed because the floating `@angular/build` 22.2 no longer writes `stats.json`; fixed by committing lockfiles dated to the release (see `app/VENDORED.md`). The server compile prints 158 `tsc` type errors, which upstream's `|| cd .` hides; the JS is still emitted and the server works.
 3. ✅ Smoke test on **port 3001** (Grafana from another project holds 3000): HTTP 200 after ~12 s, version 20.2.0. Original plan: `docker run -d --rm -p 127.0.0.1:3000:3000 --name juice juice-shop:local`, poll until `curl` gets HTTP 200, then check `docker logs`. Bind to `127.0.0.1` only. A 200 matters because the build can "succeed" with a broken server.
 4. ☐ Open `http://localhost:3000` in the Windows browser and click around **(you)**. Then `docker stop juice`.
-5. ☐ Write `.github/workflows/security.yml`: triggers `push` to `main` and `pull_request`; `permissions: {}`, with job `build` given `contents: read`; on `ubuntu-24.04`, checkout then `docker build`. Actions stay on version tags for now; hardening is deliberately left for phase 9 so Checkov has something to find in phase 5.
-6. ☐ `code-reviewer` reviews the workflow; update `layout.md`; commit.
-7. ☐ Create an empty **private** GitHub repo (no README or licence); tell Claude the URL and whether you push over HTTPS or SSH **(you)**.
-8. ☐ Push. If push protection blocks the push because of Juice Shop's deliberate fake secrets, check each flagged item and allow it as "used in tests / false positive". Don't rewrite history **(you)**.
-9. ☐ The Actions tab shows a green `security.yml` run whose log contains only checkout and docker build **(you)**.
+5. ✅ Write `.github/workflows/security.yml` (checkout@v7, plus `timeout-minutes: 30` brought forward from phase 9): triggers `push` to `main` and `pull_request`; `permissions: {}`, with job `build` given `contents: read`; on `ubuntu-24.04`, checkout then `docker build`. Actions stay on version tags for now; hardening is deliberately left for phase 9 so Checkov has something to find in phase 5.
+6. ✅ `code-reviewer` reviewed it (no defects); `layout.md` updated; committed.
+7. ✅ Repo `quocthinhluu97/owasp-juice-shop`, pushed over HTTPS. Created public by mistake, switched to **private** on 2026-10-02: from phase 2 on, report artifacts would be downloadable by anyone. Trade-off: push protection and code scanning need GitHub Advanced Security on private repos, so they're unavailable; triage stays the only gate. Original step: create an empty **private** GitHub repo (no README or licence); tell Claude the URL and whether you push over HTTPS or SSH **(you)**.
+8. ✅ Pushed `main` (`7ec515a`). Original step: push. If push protection blocks the push because of Juice Shop's deliberate fake secrets, check each flagged item and allow it as "used in tests / false positive". Don't rewrite history **(you)**.
+9. ✅ Green `security` run on `main` (~1m40s), checked in the Actions tab. Original step: the Actions tab shows a green `security.yml` run whose log contains only checkout and docker build **(you)**.
 
 **Done when:** local `curl` returns 200, the CI build is green, and `main` is pushed.
 
@@ -112,7 +112,7 @@ Goal: find misconfiguration in the Dockerfile and the GitHub workflows.
 
 1. ☐ Research: current Checkov version and digest; check IDs for root user / no `USER`, unpinned actions, script injection, base image not pinned by digest.
 2. ☐ Run with `--framework dockerfile github_actions` → SARIF in `reports/`.
-3. ☐ Summarise. Expect hits on **our own** phase 1 workflow (unpinned actions, etc.) and on the Dockerfile (base image by tag, maybe no `HEALTHCHECK`). `app/terraform/` is out of scope for these frameworks.
+3. ☐ Summarise. Check which deferred items in `security.yml` Checkov actually flags; the code-reviewer believes tag-pinned actions and `persist-credentials` are not covered and need zizmor (unverified). Expect hits on **our own** phase 1 workflow (unpinned actions, etc.) and on the Dockerfile (base image by tag, maybe no `HEALTHCHECK`). `app/terraform/` is out of scope for these frameworks.
 4. ☐ Write `docs/findings/checkov.md`.
 5. ☐ Draft the **short list of high-impact check IDs** for gating rule 5, with a reason for each. This becomes code in phase 7.
 6. ☐ `.checkov.yaml`: frameworks, paths, and skips with reasons.
