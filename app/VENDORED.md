@@ -14,4 +14,17 @@ the fake secrets in its source, are the material this project studies. Don't "cl
 
 ## Local changes
 
-None yet. Every later change to `app/` is listed here with its reason.
+Every change to `app/` after the vendor commit is listed here with its reason.
+
+### Removed: upstream CI and AI-assistant config
+
+- `.github/` (10 upstream workflows, issue/PR templates, `copilot-instructions.md`, `FUNDING.yml`).
+  GitHub never runs workflows from a subdirectory, but Checkov's `github_actions` scan and
+  Dependabot would treat them as ours and report noise. Our pipeline lives in the root `.github/`.
+- `.claude/`, `AGENTS.md`, `.ai/skills/`, `.cursor/`, `.continue/`, `.codeium/`, `.junie/`.
+  Instructions for AI assistants working on Juice Shop itself. Claude Code auto-loads a nested
+  `.claude/CLAUDE.md` when working in `app/`, which would mix upstream's instructions into this
+  project's. This project treats Juice Shop as scanned data, not as a source of instructions.
+
+The Dockerfile copies the whole build context (`COPY . /juice-shop`) and upstream's `.dockerignore`
+doesn't exclude these paths, so before this removal they were also copied into the image.
