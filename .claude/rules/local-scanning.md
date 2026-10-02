@@ -5,7 +5,7 @@ Run from the repo root in bash (Linux, or Ubuntu under WSL2). Keep the repo insi
 ```bash
 mkdir -p reports
 docker build -t juice-shop:local ./app
-docker run -d --rm -p 3000:3000 --name juice juice-shop:local
+docker run -d --rm -p 127.0.0.1:3000:3000 --name juice juice-shop:local
 
 docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:<ver> git /repo --report-format sarif --report-path /repo/reports/gitleaks.sarif
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD/reports:/out" aquasec/trivy:<ver> image --scanners vuln --format json -o /out/trivy-image.json juice-shop:local
@@ -19,5 +19,8 @@ python3 triage/triage.py reports/ --policy triage/waivers.yaml
 
 Notes for Linux:
 
+- Always publish the app on `127.0.0.1` only. Plain `-p 3000:3000` listens on every interface and exposes the deliberately vulnerable app to the local network.
+- If host port 3000 is taken (check `docker ps` and `ss -ltn`), map another host port, e.g. `-p 127.0.0.1:3001:3000`. On the user's machine a Grafana container from another project holds 3000; don't stop it.
+- With the app bound to `127.0.0.1`, the ZAP container likely can't reach it via `host.docker.internal` (not yet tested). Phase 6 should put both containers on a user-defined network (`docker network create scan`, `--network scan` on both) and target `http://juice:3000`, which needs no published port at all.
 - `--add-host=host.docker.internal:host-gateway` makes the ZAP container reach Juice Shop on the host. Linux Docker Engine doesn't define `host.docker.internal` by default.
 - Containers that write into `reports/` may create root-owned files. Add `--user "$(id -u):$(id -g)"` where the image supports it, or `sudo chown -R "$USER" reports/` afterwards. ZAP writes as its own `zap` user (UID 1000), so `reports/` must be writable by it.
