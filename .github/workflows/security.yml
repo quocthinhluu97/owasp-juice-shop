@@ -1,5 +1,7 @@
-# Phase 1: build the Juice Shop image and nothing else.
-# Scan jobs (phases 2-6) and the triage gate (phase 7) are added one at a time.
+# Build the Juice Shop image and run the security scanners.
+# Phase 1: build. Phase 2: gitleaks. Scan jobs (phases 3-6) and the triage gate (phase 7) are
+# added one at a time. Scan jobs never fail on findings: they upload their report as an
+# artifact, and triage is the only job that decides pass/fail.
 #
 # Deliberately not hardened yet: actions use version tags (not commit SHAs), checkout keeps its
 # credentials, and there is no concurrency group. These are fixed in phase 9
@@ -26,3 +28,70 @@ jobs:
 
       - name: Build image
         run: docker build -t juice-shop:ci ./app
+
+  gitleaks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history; the default (1) would scan only the last commit
+
+      # --exit-code 0: findings don't fail the job, triage decides.
+      # --log-opts: scan everything reachable from the commit being built (its full history), not
+      #   `--all` refs: fetch-depth 0 also fetches other branches, whose secrets aren't this build's.
+      #   --diff-filter=tuxdb is gitleaks' default, which a custom --log-opts would otherwise drop.
+      # --user: run as the runner's UID, so git sees the repo as ours and files aren't root-owned.
+      # --exit-code 0 also hides git errors: gitleaks then logs ERR, scans 0 commits and writes a
+      #   valid, empty report. The checks below turn that into a failure, so an empty report
+      #   always means "no findings", never "nothing was scanned".
+      # No --redact: triage fingerprints secrets as rule + file + sha256(secret)
+      #   (.claude/rules/triage-script.md), and a redacted report would give every finding the same
+      #   hash. The raw report stays in $RUNNER_TEMP; only a copy with each secret replaced by its
+      #   sha256 and the matched text removed goes into reports/ and the artifact.
+      - name: Scan git history
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          if [ "$(git rev-parse --is-shallow-repository)" != false ]; then
+            echo "::error::shallow clone: gitleaks would not see the full history"; exit 1
+          fi
+          log="$RUNNER_TEMP/gitleaks.log"
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/repo:ro" -v "$RUNNER_TEMP:/out" \
+            zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            git /repo --config /repo/.gitleaks.toml --exit-code 0 --no-banner \
+            --log-opts="--full-history --diff-filter=tuxdb HEAD" \
+            --report-format json --report-path /out/gitleaks-raw.json 2>"$log" \
+            || { cat "$log"; exit 1; }
+          sed -i 's/\x1b\[[0-9;]*m//g' "$log" # strip colour codes so the greps below match
+          cat "$log"
+          if grep -qE ' (ERR|FTL) ' "$log"; then
+            echo "::error::gitleaks logged an error; the report may be incomplete"; exit 1
+          fi
+          scanned=$(grep -oE '[0-9]+ commits scanned' "$log" | grep -oE '^[0-9]+' || true)
+          if [ "${scanned:-0}" -eq 0 ]; then
+            echo "::error::gitleaks scanned 0 commits"; exit 1
+          fi
+
+      - name: Hash secrets in the report
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/gitleaks-raw.json" reports/gitleaks.json <<'EOF'
+          import hashlib, json, sys
+          findings = json.load(open(sys.argv[1]))
+          for f in findings:
+              f["Secret"] = "sha256:" + hashlib.sha256(f["Secret"].encode()).hexdigest()
+              f["Match"] = "REDACTED"
+          json.dump(findings, open(sys.argv[2], "w"), indent=1)
+          print(f"{len(findings)} findings, secrets hashed")
+          EOF
+          rm -f "$RUNNER_TEMP/gitleaks-raw.json"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gitleaks-report
+          path: reports/gitleaks.json
+          if-no-files-found: error # a missing report must not look like "no findings"
+          retention-days: 7
