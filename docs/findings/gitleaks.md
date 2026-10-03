@@ -30,3 +30,33 @@ like the other 6.
 **Lesson.** Gitleaks finds secrets that *look like* secrets. A clean report means
 "nothing matched the rules", not "there are no secrets". Custom rules can close known gaps,
 but only gaps you already know about.
+
+## Allowlists and why
+
+Both live in `.gitleaks.toml`.
+
+**1. Test files, by path, for two rules** (`^app/test/` and `^app/frontend/src/app/.+\.spec\.ts$`;
+`jwt` and `generic-api-key` only). Juice Shop's tests hold forged JWTs and passwords for fake
+users. Checked: none of them is a credential for anything real. Without this allowlist those
+two rules produce 61 findings in test files, and no other rule fires there. Scoping it to
+those two rules means a real private key or cloud token committed to a test is still reported.
+
+**2. Ethereum addresses, by value.** The roadmap said "allowlist by path only". This one is an
+exception, accepted for these reasons:
+
+- **An address is not a secret.** It is a public on-chain identifier, like an account number
+  printed on an invoice. Knowing it gives no access. `generic-api-key` flags it only because a
+  name like `...Address = '0x...'` sits in front of a long hex string.
+- **A path list would be worse.** Only one file is flagged today (`faucet.component.ts`), but
+  addresses occur in about 20: `routes/web3Wallet.ts`, `data/static/codefixes/*`,
+  `data/static/web3-snippets/*.sol` and several tests. Whether they get flagged depends on
+  the variable name in front of them. A path entry hides *every* string in that file, and
+  each newly flagged file would need another entry.
+- **It is kept narrow.** It applies to one rule only (`generic-api-key`); it matches the
+  extracted secret (`regexTarget = "secret"`), not the whole line; and `^0x[0-9a-fA-F]{40}$` is
+  anchored to exactly 40 hex characters. An Ethereum **private key** is `0x` + 64 hex, so it
+  is still reported.
+
+**Remaining risk (accepted).** A real secret that happens to be exactly `0x` + 40 hex
+characters would be hidden. That shape is what an address looks like, not what tokens or keys
+from common providers look like.

@@ -1,0 +1,20 @@
+title = "Gitleaks config for this repo"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Juice shop's test files contain fake tokens and passwords used by its tests.  Checked: forged JWTs for fake users, not credentials. Limited to the two rules that fire there (jwt, generic-api-key), so e.g. a real private key in a test is still reported."
+targetRules = ["jwt", "generic-api-key"]
+paths = ['''^app/test/''', '''^app/frontend/src/app/.+\.spec\.ts$''']
+
+[[allowlists]]
+description = "Ethereum addresses (0x + 40 hex chars) are public identifiers, not secrets. Matched by generic-api-key in faucet.component.ts. By value, not path: addresses occur in ~20 files; the anchored 40-hex match still catches 64-hex private keys. Full reason: docs/findings/gitleaks.md."
+targetRules = ["generic-api-key"]
+regexTarget = "secret"
+regexes = ['''^0x[0-9a-fA-F]{40}$''']
+
+[[rules]]
+id = "key-files"
+description = "file name *.key usually hold a raw secret."
+path  = '''\.key$'''

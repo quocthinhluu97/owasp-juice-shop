@@ -72,7 +72,7 @@ Goal: find secrets anywhere in git history, not just the current files.
 2. ☐ Run locally against the full history → `reports/gitleaks.sarif`.
 3. ☐ Summarise by rule and file. Expect many hits from Juice Shop's deliberate fakes (`ctf.key`, `encryptionkeys/`, `data/static/`, `ftp/`, test files). Sort each into deliberate fake, test data, or looks real.
 4. ☐ Write `docs/findings/gitleaks.md`.
-5. ☐ Write `.gitleaks.toml`: extend the default rules; allowlist **by path only**, one reason per path. No disabled rules.
+5. ✅ Write `.gitleaks.toml`: extend the default rules; allowlist **by path only**, one reason per path. No disabled rules. Exception: one value-based allowlist for Ethereum addresses (public identifiers, spread over ~20 files); reason in `docs/findings/gitleaks.md`.
 6. ☐ Re-run and confirm only the allowlisted paths dropped out.
 7. ☐ CI job `gitleaks`: checkout with `fetch-depth: 0` (otherwise only the last commit is scanned), the scan step doesn't fail the job, the SARIF is uploaded as an artifact.
 8. ☐ Review, PR, merge.
