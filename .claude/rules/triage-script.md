@@ -12,7 +12,7 @@ Use Python 3.12+ and the standard library where possible. Allowed extra dependen
 - **Normalize** every finding to one `Finding` model with these fields: `tool`, `rule_id`, `category` (secret | vuln | code | iac | dast), `severity` (critical/high/medium/low/info, mapped explicitly per tool and never guessed), `location` (file+line, or package+version, or URL+param), `cve`/`cwe` when present, `fixed_version`, and `fingerprint`.
 - **Dedupe** on the fingerprint, and keep a list of every tool that reported the finding:
   - vuln: `cve + package + installed_version` (the same CVE from `trivy image` and `trivy fs` counts once)
-  - secret: `rule + file + sha256(secret)`. Never store or print the raw secret.
+  - secret: `rule + file + sha256(secret)`. Never store or print the raw secret. The CI `gitleaks` job already replaces `Secret` with `sha256:<hex>` and `Match` with `REDACTED` in `reports/gitleaks.json`; use that hash as-is.
   - code/iac: `cwe or rule + file + line` (allow a small line tolerance if tools disagree)
   - dast: `alert_id + url_path + param`
 - **Enrich:** CISA KEV catalog (JSON feed, cached to a file with a timestamp, and refreshed at most daily) and EPSS if useful. Tests must never hit the network. They use a fixture copy of the feed.

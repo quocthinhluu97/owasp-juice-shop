@@ -7,7 +7,7 @@ mkdir -p reports
 docker build -t juice-shop:local ./app
 docker run -d --rm -p 127.0.0.1:3000:3000 --name juice juice-shop:local
 
-docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:<ver> git /repo --report-format sarif --report-path /repo/reports/gitleaks.sarif
+docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:<ver> git /repo --report-format sarif --report-path /repo/reports/gitleaks.sarif   # exploration only; CI's hashed JSON is what triage reads (see security.yml)
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD/reports:/out" aquasec/trivy:<ver> image --scanners vuln --format json -o /out/trivy-image.json juice-shop:local
 docker run --rm -v "$PWD:/src" aquasec/trivy:<ver> fs --scanners vuln --format json -o /src/reports/trivy-fs.json /src/app
 docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:<ver> semgrep scan --config p/default --sarif -o reports/semgrep.sarif app
