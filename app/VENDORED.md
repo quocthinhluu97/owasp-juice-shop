@@ -59,4 +59,6 @@ Both `.npmrc` files need the change: `.dockerignore` excludes only the root `.np
 lockfile.
 
 Side effects: builds are reproducible, and Trivy's `fs` scan can read exact dependency versions.
+**Caveat (phase 3):** not fully. 11 production package versions in the image differ from the
+lockfile, likely changed by the Dockerfile's `npm dedupe`; see `docs/findings/trivy.md`.
 Dependencies stay at their 2026-08 versions until deliberately updated (a phase 8 candidate).

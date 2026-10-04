@@ -9,8 +9,8 @@ Status: ✅ done · ▶ in progress · ☐ not started
 |---|---|---|
 | 0 | Setup: Docker, git repo, vendor Juice Shop | ✅ |
 | 1 | App + Dockerfile + minimal workflow | ✅ |
-| 2 | Gitleaks: secrets in git history | ▶ |
-| 3 | Trivy: vulnerable packages in image and repo | ☐ |
+| 2 | Gitleaks: secrets in git history | ✅ |
+| 3 | Trivy: vulnerable packages in image and repo | ▶ |
 | 4 | Semgrep: insecure code patterns | ☐ |
 | 5 | Checkov: Dockerfile and workflow misconfiguration | ☐ |
 | 6 | ZAP baseline: passive scan of the running app | ☐ |
@@ -64,32 +64,32 @@ Goal: the image builds in CI and nothing else happens.
 
 **Done when:** local `curl` returns 200, the CI build is green, and `main` is pushed.
 
-## Phase 2: Gitleaks ☐
+## Phase 2: Gitleaks ✅
 
 Goal: find secrets anywhere in git history, not just the current files.
 
-1. ☐ Research: current Gitleaks version and digest; the `gitleaks git` command and its SARIF flags.
-2. ☐ Run locally against the full history → `reports/gitleaks.sarif`.
-3. ☐ Summarise by rule and file. Expect many hits from Juice Shop's deliberate fakes (`ctf.key`, `encryptionkeys/`, `data/static/`, `ftp/`, test files). Sort each into deliberate fake, test data, or looks real.
-4. ☐ Write `docs/findings/gitleaks.md`.
+1. ✅ Research: current Gitleaks version and digest; the `gitleaks git` command and its SARIF flags.
+2. ✅ Run locally against the full history → `reports/gitleaks.sarif`.
+3. ✅ Summarise by rule and file. Expect many hits from Juice Shop's deliberate fakes (`ctf.key`, `encryptionkeys/`, `data/static/`, `ftp/`, test files). Sort each into deliberate fake, test data, or looks real.
+4. ✅  Write `docs/findings/gitleaks.md`.
 5. ✅ Write `.gitleaks.toml`: extend the default rules; allowlist **by path only**, one reason per path. No disabled rules. Exception: one value-based allowlist for Ethereum addresses (public identifiers, spread over ~20 files); reason in `docs/findings/gitleaks.md`.
-6. ☐ Re-run and confirm only the allowlisted paths dropped out.
+6. ✅ Re-run and confirm only the allowlisted paths dropped out.
 7. ✅ CI job `gitleaks`: checkout with `fetch-depth: 0`; scan scoped to `HEAD`'s full history (not other branches); `--exit-code 0`, but a git error or 0 commits scanned fails the job (otherwise an empty report passes as clean); report is **JSON with secrets replaced by sha256** (not SARIF, not `--redact`, so triage can fingerprint per `triage-script.md`), uploaded as artifact `gitleaks-report` (7 days). Verified locally: 8 findings, same as before. Review findings left for later: PRs can edit `.gitleaks.toml` themselves (CODEOWNERS, phase 9); `key-files` findings have line 0, so the triage parser should treat that as "whole file" (phase 7).
-8. ☐ Review, PR, merge.
+8. ✅ Review, PR, merge.
 
 **Decision point:** decide how to handle a hit that looks real. Rotating it is always the answer, even in a learning repo.
 
-## Phase 3: Trivy ☐
+## Phase 3: Trivy ▶
 
 Goal: find known-vulnerable packages (CVEs) in the built image and in the repo's dependency files.
 
-1. ☐ Research: current Trivy version and digest; JSON fields `FixedVersion`, `PkgPath`, dev versus prod dependency flags.
+1. ✅ (researcher agent) Trivy **0.75.0**, digest `sha256:af6acf9a…855daa` (verified with `imagetools inspect`). Note the March 2026 Trivy supply-chain incident (GHSA-69fq-xp46-6x23): pin by digest, don't use `trivy-action`. Original step: research current Trivy version and digest; JSON fields `FixedVersion`, `PkgPath`, dev versus prod dependency flags.
 2. ✅ **Decided in phase 1: lockfiles committed** (forced by a build break). Original note: `trivy fs` needs a lockfile to see npm versions, and Juice Shop has none. Options: (a) generate `package-lock.json` (and `frontend/`'s) in a Node container and commit it, recorded in `VENDORED.md` as a local change; (b) rely on `trivy image` only. Option (a) also makes builds reproducible.
-3. ☐ `trivy image --scanners vuln` on `juice-shop:local` → `reports/trivy-image.json`. Secret and misconfig scanning stay off, because Gitleaks and Checkov cover those.
-4. ☐ `trivy fs --scanners vuln app/` → `reports/trivy-fs.json`.
-5. ☐ Summarise by severity, fix available or not, OS package (distroless Debian) versus npm package, prod versus dev, and the overlap between the image and fs results.
-6. ☐ Write `docs/findings/trivy.md`. Flag candidate dependency bumps for phase 8.
-7. ☐ `.trivyignore` only for specific CVEs with a reason (e.g. a vulnerable function that isn't reachable); no blanket severity cut-offs.
+3. ✅ `trivy image --scanners vuln` on `juice-shop:local` → `reports/trivy-image.json`. Secret and misconfig scanning stay off, because Gitleaks and Checkov cover those.
+4. ✅ `trivy fs --scanners vuln app/` → `reports/trivy-fs.json`.
+5. ✅ Summarise by severity, fix available or not, OS package (distroless Debian) versus npm package, prod versus dev, and the overlap between the image and fs results.
+6. ✅ Write `docs/findings/trivy.md`. Found: the image doesn't fully follow the committed lockfile (11 prod packages differ, likely `npm dedupe`), a phase 8 candidate. Flag candidate dependency bumps for phase 8.
+7. ✅ No `.trivyignore`: deliberate findings go to `triage/waivers.yaml` in phase 7 instead. Original step: `.trivyignore` only for specific CVEs with a reason (e.g. a vulnerable function that isn't reachable); no blanket severity cut-offs.
 8. ☐ CI job `trivy`: needs the image, so either build it in the same job or pass it via `docker save` as an artifact. JSON uploaded as an artifact.
 9. ☐ Review, PR, merge.
 
