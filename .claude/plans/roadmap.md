@@ -103,7 +103,7 @@ Goal: find insecure patterns in first-party code.
 4. ✅ Write `docs/findings/semgrep.md`. Pick one real `ERROR` finding as the phase 8 code fix.
 5. ✅ `.semgrepignore`: a custom file **replaces** Semgrep's defaults (verified), so they're restated. Secret rules stay on; triage merges `generic.secrets.*` with Gitleaks, never gates. Terraform and `.npmrc` non-gating: named exclusions added to gating rule 4 (exclusion form kept, not an allow-list). Original step: `.semgrepignore` with a reason per path (`codefixes/`, `test/`, built frontend output). Leave `routes/` and `lib/` fully scanned.
 6. ✅ Re-run: 55 → 37 findings, exactly the 15 `codefixes/` + 3 `*.spec.ts` ones; errors 41 → 8.
-7. ☐ CI job `semgrep`, SARIF artifact.
+7. ✅ CI job `semgrep`: JSON (for triage) + SARIF artifact; coverage check fails if any tracked first-party server file (`routes/`, `lib/`, `models/`, `data/*.ts`, `views/`, `server.ts`, `app.ts`; 121 files) wasn't scanned or any error other than Angular-template partial parsing appears.
 8. ☐ Review, PR, merge.
 
 ## Phase 5: Checkov ☐
