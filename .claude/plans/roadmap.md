@@ -10,8 +10,8 @@ Status: ✅ done · ▶ in progress · ☐ not started
 | 0 | Setup: Docker, git repo, vendor Juice Shop | ✅ |
 | 1 | App + Dockerfile + minimal workflow | ✅ |
 | 2 | Gitleaks: secrets in git history | ✅ |
-| 3 | Trivy: vulnerable packages in image and repo | ▶ |
-| 4 | Semgrep: insecure code patterns | ☐ |
+| 3 | Trivy: vulnerable packages in image and repo | ✅ |
+| 4 | Semgrep: insecure code patterns | ▶ |
 | 5 | Checkov: Dockerfile and workflow misconfiguration | ☐ |
 | 6 | ZAP baseline: passive scan of the running app | ☐ |
 | 7 | Triage script: one pass/fail decision | ☐ |
@@ -79,7 +79,7 @@ Goal: find secrets anywhere in git history, not just the current files.
 
 **Decision point:** decide how to handle a hit that looks real. Rotating it is always the answer, even in a learning repo.
 
-## Phase 3: Trivy ▶
+## Phase 3: Trivy ✅
 
 Goal: find known-vulnerable packages (CVEs) in the built image and in the repo's dependency files.
 
@@ -91,19 +91,19 @@ Goal: find known-vulnerable packages (CVEs) in the built image and in the repo's
 6. ✅ Write `docs/findings/trivy.md`. Found: the image doesn't fully follow the committed lockfile (11 prod packages differ, likely `npm dedupe`), a phase 8 candidate. Flag candidate dependency bumps for phase 8.
 7. ✅ No `.trivyignore`: deliberate findings go to `triage/waivers.yaml` in phase 7 instead. Original step: `.trivyignore` only for specific CVEs with a reason (e.g. a vulnerable function that isn't reachable); no blanket severity cut-offs.
 8. ✅ CI job `trivy`: `build` saves the image as an artifact (1 day); `trivy` scans it with `--input` (no Docker socket), then the lockfiles; DB cached daily; a coverage check fails the job if no OS was detected or a lockfile wasn't scanned. Original step: needs the image, so either build it in the same job or pass it via `docker save` as an artifact. JSON uploaded as an artifact.
-9. ☐ Review, PR, merge.
+9. ✅ Review, PR, merge (PR #2). CI matched the local run except 1 fewer npm row in the image scan (lockfile scan unchanged), likely build-to-build drift.
 
-## Phase 4: Semgrep ☐
+## Phase 4: Semgrep ▶
 
 Goal: find insecure patterns in first-party code.
 
-1. ☐ Research: current Semgrep version and digest; registry rulesets `p/default`, `p/javascript`, `p/typescript` (no login needed).
-2. ☐ Run locally → `reports/semgrep.sarif`.
-3. ☐ Summarise by rule, severity and folder. Expect noise from `data/static/codefixes/` (161 deliberately vulnerable snippets that never run), `test/` and `frontend/` assets. Real hits will cluster in `routes/` and `lib/`, much of it deliberate.
-4. ☐ Write `docs/findings/semgrep.md`. Pick one real `ERROR` finding as the phase 8 code fix.
-5. ☐ `.semgrepignore` with a reason per path (`codefixes/`, `test/`, built frontend output). Leave `routes/` and `lib/` fully scanned.
-6. ☐ Re-run and compare counts.
-7. ☐ CI job `semgrep`, SARIF artifact.
+1. ✅ (researcher agent) Semgrep **1.179.0**, digest `sha256:93963d92…e01b` (verified). Without login, `extra.fingerprint` is "requires login"; registry rules change between runs. Original step: research current Semgrep version and digest; registry rulesets `p/default`, `p/javascript`, `p/typescript` (no login needed).
+2. ✅ Run locally → `reports/semgrep.json` + `.sarif` (one run). 55 findings, 971 files; exit 0 with findings.
+3. ✅ Summarise by rule, severity and folder. All 5 first-party `ERROR`s are real and deliberate; 4 known challenges (NoSQLi, XXE, SSRF, B2B RCE) missed. Original step: summarise by rule, severity and folder. Expect noise from `data/static/codefixes/` (161 deliberately vulnerable snippets that never run), `test/` and `frontend/` assets. Real hits will cluster in `routes/` and `lib/`, much of it deliberate.
+4. ✅ Write `docs/findings/semgrep.md`. Pick one real `ERROR` finding as the phase 8 code fix.
+5. ✅ `.semgrepignore`: a custom file **replaces** Semgrep's defaults (verified), so they're restated. Secret rules stay on; triage merges `generic.secrets.*` with Gitleaks, never gates. Terraform and `.npmrc` non-gating: named exclusions added to gating rule 4 (exclusion form kept, not an allow-list). Original step: `.semgrepignore` with a reason per path (`codefixes/`, `test/`, built frontend output). Leave `routes/` and `lib/` fully scanned.
+6. ✅ Re-run: 55 → 37 findings, exactly the 15 `codefixes/` + 3 `*.spec.ts` ones; errors 41 → 8.
+7. ✅ CI job `semgrep`: JSON (for triage) + SARIF artifact; coverage check fails if any tracked first-party server file (`routes/`, `lib/`, `models/`, `data/*.ts`, `views/`, `server.ts`, `app.ts`; 121 files) wasn't scanned or any error other than Angular-template partial parsing appears.
 8. ☐ Review, PR, merge.
 
 ## Phase 5: Checkov ☐

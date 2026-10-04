@@ -1,5 +1,5 @@
 # Build the Juice Shop image and run the security scanners.
-# Phase 1: build. Phase 2: gitleaks. Phase 3: trivy. Scan jobs (phases 4-6) and the triage gate (phase 7) are
+# Phase 1: build. Phase 2: gitleaks. Phase 3: trivy. Phase 4: semgrep. Scan jobs (phases 5-6) and the triage gate (phase 7) are
 # added one at a time. Scan jobs never fail on findings: they upload their report as an
 # artifact, and triage is the only job that decides pass/fail.
 #
@@ -210,3 +210,77 @@ jobs:
         with:
           path: .cache/trivy/db
           key: ${{ steps.db-version.outputs.key }}
+
+  semgrep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      # Registry rulesets, fetched at scan time (so results can change between runs of the same
+      # commit; see docs/findings/semgrep.md). --metrics=off: nothing is sent to Semgrep.
+      # No --error: findings exit 0, triage decides. A non-zero exit is a real error and fails.
+      # .semgrepignore at the repo root replaces Semgrep's built-in ignore defaults.
+      # HOME=/tmp: Semgrep writes a settings file there, and the runner's UID has no home in
+      # the image.
+      - name: Scan app/
+        run: |
+          set -euo pipefail
+          mkdir -p reports
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src" -w /src \
+            semgrep/semgrep:1.179.0@sha256:93963d9295a366f59e4850127b1550400ee7b388f04fe144e4a1f6325d96e01b \
+            semgrep scan app \
+              --config p/default --config p/javascript --config p/typescript \
+              --metrics=off --disable-version-check \
+              --json-output=reports/semgrep.json --sarif-output=reports/semgrep.sarif
+
+      # Semgrep can exit 0 while covering less: parse errors and timeouts only appear in
+      # errors[], and skipped files are just absent. Fail unless every tracked first-party server
+      # file was scanned and the only errors are the known partial parses of Angular templates.
+      # rsn/ is left out on purpose: dev tooling (`npm run rsn`) that never runs in production.
+      - name: Check scan coverage
+        run: |
+          set -euo pipefail
+          r=reports/semgrep.json
+          fail=0
+          # Pathspec * matches across /, so lib/startup/ etc. are included.
+          expected=$(git ls-files 'app/routes/*.ts' 'app/lib/*.ts' 'app/models/*.ts' \
+            'app/data/*.ts' 'app/views/*' app/server.ts app/app.ts \
+            ':(exclude)app/data/static/codefixes/*' | LC_ALL=C sort)
+          # Guard against a vacuous pass: an empty list would make every comparison succeed.
+          if [ "$(grep -c . <<<"$expected")" -lt 100 ]; then
+            echo "::error::expected-file list is suspiciously short; check the pathspecs"; exit 1
+          fi
+          missing=$(comm -23 <(echo "$expected") <(jq -r '.paths.scanned[]' "$r" | LC_ALL=C sort))
+          if [ -n "$missing" ]; then
+            echo "::error::first-party server files not scanned:"; echo "$missing"; fail=1
+          fi
+          unexpected=$(jq -r '.errors[]
+            | select((.type | type) != "array" or .type[0] != "PartialParsing"
+                     or ((.path // "") | test("\\.component\\.html$") | not))
+            | "\(.type | if type == "array" then .[0] else . end): \(.path // .message // "-")"' "$r")
+          if [ -n "$unexpected" ]; then
+            echo "::error::unexpected scan errors:"; echo "$unexpected"; fail=1
+          fi
+          jq -r '"semgrep \(.version): \(.paths.scanned | length) files scanned, \(.errors | length) errors, \(.results | length) findings"' "$r"
+          jq -r '.results[].extra.severity' "$r" | sort | uniq -c
+          exit "$fail"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: semgrep-reports
+          path: |
+            reports/semgrep.json
+            reports/semgrep.sarif
+          if-no-files-found: error
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: semgrep-reports-incomplete
+          path: reports/semgrep.*
+          if-no-files-found: ignore
+          retention-days: 7
