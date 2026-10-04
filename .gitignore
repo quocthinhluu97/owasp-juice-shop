@@ -8,3 +8,6 @@ __pycache__/
 
 # Cached CISA KEV / EPSS feeds (phase 7)
 triage/.cache/
+
+# Trivy vulnerability DB cache (phase 3)
+/.cache/

@@ -1,0 +1,176 @@
+# Trivy: vulnerable packages in the image and the lockfiles
+
+## What ran
+
+Trivy **0.75.0**, pinned by digest (`aquasec/trivy:0.75.0@sha256:af6acf9a…855daa`), vuln scanner
+only (Gitleaks and Checkov cover secrets and misconfig). JSON output, `--list-all-pkgs`. Run on
+2026-10-03 against `juice-shop:local` built from v20.2.0 with the committed lockfiles.
+
+| Scan | Target | Packages | Vulnerability rows |
+|---|---|---|---|
+| `trivy image` | Debian 13.7 OS packages (distroless base) | 14 | 31 |
+| `trivy image` | npm packages installed in the image | 695 | 106 |
+| `trivy fs app/` | `package-lock.json` (dev deps excluded by default) | 645 | 114 |
+| `trivy fs app/` | `frontend/package-lock.json` (dev deps excluded) | 660 | 39 |
+
+Both scans covered what they should: the OS was detected and every result lists packages. A scan
+that silently found nothing to scan would also produce a "clean" JSON file.
+
+**Why pin by digest (Trivy specifically).** In March 2026, Trivy v0.69.4–0.69.6 were published
+as malicious builds, and 76 of 77 `trivy-action` tags were force-pushed to code that stole CI
+secrets ([GHSA-69fq-xp46-6x23](https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23)).
+A tag can be moved; a digest cannot. That's also why CI runs the pinned image directly instead
+of `trivy-action`.
+
+## Counts
+
+| | Critical | High | Medium | Low |
+|---|---|---|---|---|
+| Image: OS packages | 0 | 0 | 23 | 8 |
+| Image: npm | 9 | 46 | 43 | 8 |
+| fs: `package-lock.json` | 9 | 51 | 46 | 8 |
+| fs: `frontend/package-lock.json` | 1 | 13 | 21 | 4 |
+
+- **All Critical/High are in npm packages.** The distroless base is in good shape.
+- **50 of the 55 Critical/High in the image have a fix**, so gating rule 3 will block on them in
+  phase 7. The build is expected to go red.
+- **Nothing is in CISA KEV.** Checked against KEV catalogue 2026.10.02 (1,733 entries). 5 of
+  the 155 IDs aren't CVEs (`GHSA-…`, `NSWG-ECO-…`) and can never match KEV; triage must say so,
+  not treat them as "not in KEV".
+- **`FixedVersion` is a comma-separated list, one fix per release line, not sorted**, e.g.
+  `5.3.2, 4.9.4, 6.0.0-rc.5`. The triage parser must keep it as a list.
+
+## Image versus lockfiles
+
+Each finding keyed by CVE + package + installed version:
+
+| In both | Image only | fs only |
+|---|---|---|
+| 106 | 31 | 36 |
+
+- **The 31 image-only rows are all Debian OS packages** (`libc6` ×21, plus `gcc-14-base`,
+  `libgcc-s1`, `libgomp1`, `libstdc++6` and `zlib1g` ×2 each). No lockfile lists them. For npm
+  packages, nothing is image-only: the lockfile accounts for every npm finding in the image.
+- **28 fs-only are from `frontend/package-lock.json`.** Trivy's "not dev" flag does *not* mean
+  "ships to the browser". **23 rows are build/test tooling**, installed in the build stage and
+  never reaching a user. They count as production for two different reasons:
+  - **12 rows are devDependencies that npm marks `devOptional`** (`undici` 7.29.0 ×10 via
+    `jsdom`, plus `vitest` and `@vitest/mocker`). `vitest` and `jsdom` are in the frontend's
+    `devDependencies`, but they are also optional peers of `@angular/build`, a production
+    dependency. So the lockfile marks them `"devOptional": true` instead of `"dev": true`.
+    Trivy only excludes `dev: true`.
+  - **11 rows come from build tools listed under `dependencies`.** Juice Shop puts
+    `@angular/build`, `@angular/cli`, `@angular/compiler-cli`, `@cyclonedx/cyclonedx-esbuild`,
+    `sass` and `typescript` there, not in `devDependencies`, so what they pull in counts as
+    production: `fast-uri` ×6 (via `ajv`), `hono` ×4 (via `@modelcontextprotocol/sdk` ←
+    `@angular/cli`) and `piscina`.
+  - **3 rows plausibly ship in the browser bundle:** `elliptic` (via ethers), `parseuri` (via
+    socket.io-client) and `@angular/router`.
+  - **2 rows are unverified:** `ws` 8.18.0 via `@ethersproject/providers`. Its browser build
+    normally uses the native WebSocket instead.
+
+  **For phase 7:** gating rule 3 blocks on "production dependencies", and Trivy marks all 28 as
+  production. Triage needs its own label for frontend-lockfile findings, at least "frontend
+  build tooling" versus "browser bundle", and the rule has to say whether build tooling blocks.
+  Triage can walk `Packages[].DependsOn` in the fs report (present because of
+  `--list-all-pkgs`; e.g. `jsdom@29.1.1` lists `undici@7.29.0`) to find each package's top-level
+  parent. It can't see `devOptional`, so for that it needs the lockfile or a rule. The root
+  lockfile's prod/dev split has the same `devOptional` gap.
+- **8 fs-only are from the root lockfile** (`brace-expansion` ×6, `moment`, `js-yaml`). They
+  revealed a real problem, below.
+
+### Finding: the image doesn't fully follow the committed lockfile
+
+The image has different versions than `app/package-lock.json` for **11 production packages**
+(compared against the lockfile copied out of the built image). Some went up: `moment` 2.30.1 →
+2.31.0, `js-yaml` 3.15.1 → 3.15.2, `brace-expansion` 1.1.18 → 1.1.21 and
+`glob/node_modules/brace-expansion` 2.1.4 → 2.1.7 (each accounts for 3 of the 6
+`brace-expansion` rows). Some went down: `core-util-is` 1.0.3 → 1.0.2, `lowercase-keys` 1.0.1 →
+1.0.0. Two nested copies disappeared (`cacheable-request/node_modules/lowercase-keys`,
+`mime-types/node_modules/mime-db`), which is hoisting. Up, down and hoisted together is the
+signature of `npm dedupe`, which re-resolves the tree within the `^` ranges. The likely cause is
+`RUN npm dedupe --omit=dev` in the Dockerfile, but that's not verified by a build without it.
+
+Why it matters:
+- **The build isn't reproducible**, which contradicts the claim in `app/VENDORED.md`. Two builds
+  on different days can ship different code.
+- **The lockfile scan can be wrong about production.** Here drift happened to *remove* 8
+  findings. It could equally add a vulnerable version the lockfile scan never sees. The image
+  scan is the ground truth for what ships.
+
+`app/VENDORED.md` still says "builds are reproducible"; it now points here.
+
+**Phase 8 candidate:** `npm ci --omit=dev` instead of `npm install` + `npm dedupe`, then confirm
+that the image lockfile equals the repo lockfile.
+
+## Real versus noise
+
+"Imported by first-party code" below is grep-level evidence (`routes/`, `lib/`, `data/`,
+`server.ts`), not proof of reachability.
+
+**Real, reachable, deliberate.** These are the vulnerabilities Juice Shop's challenges are built
+on. Bumping them breaks challenges. Waive them in phase 7 with that reason.
+- `jsonwebtoken` 0.1.0 (via `express-jwt`) and 0.4.0: **CVE-2015-9235**, signature check
+  bypass with an altered token. Used by `lib/insecurity.ts` and `routes/verify.ts`. JWT forging
+  challenges.
+- `sanitize-html` 1.4.2: a direct dependency pinned to an ancient version, used by
+  `lib/insecurity.ts`. XSS challenges.
+
+**Real, reachable, not deliberate.**
+- `multer` 1.4.5-lts.2 (11 rows, 10 High): direct dependency, used in `server.ts` for file
+  uploads. Upload handling is an attack surface. Every fix is on 2.x, so this is a major
+  upgrade (1 → 2) that may change the upload API and break upload challenges.
+
+**Present, probably not reachable at runtime.**
+- `crypto-js` 3.3.0, two Criticals, pulled in by `pdfkit` 0.11.0, which `routes/order.ts` uses
+  for order PDFs. crypto-js code *does* run on every PDF: pdfkit calls `CryptoJS.MD5` in its
+  constructor to make the file ID. Neither vulnerable function is reached, though (checked in
+  the installed `pdfkit/js/pdfkit.js`):
+  - **CVE-2023-46233** (weak PBKDF2): pdfkit never calls `PBKDF2`, encrypted or not. It only
+    appears in `pdfkit.standalone.js`, which bundles all of crypto-js.
+  - **CVE-2026-71851** (weak `WordArray.random()`): pdfkit only uses it to encrypt a PDF with a
+    password, and `routes/order.ts` calls `new PDFDocument()` with none.
+- `decompress` 4.2.1 (Critical, **no fix**): pulled in by `download`, which `lib/utils.ts` uses
+  to fetch images at startup. `download` only calls `decompress` when asked to extract an
+  archive, and Juice Shop doesn't ask. Rule 3 doesn't block it anyway (no fix).
+- `tar` 6.2.1 (12 rows, incl. 1 Critical): a direct dependency of `sqlite3` 5.1.7 (and of its
+  nested `node-gyp`/`cacache`), not required by anything in `sqlite3/lib` (grep-level), so at most
+  it's used at install time and doesn't run when the app runs. Every fix is on the 7.x line. Whether a newer `sqlite3` moves to tar 7 is not checked.
+
+**OS packages.** `libc6` has 21 rows, all Medium/Low. Nothing to do now. They clear when the
+distroless base image is updated.
+
+## "Fix available" isn't always something you can act on
+
+`undici` 5.29.0 has 13 rows, 3 of them High, all with a "fix". But every fix is on the 6.x line or
+later, and `@ai-sdk/provider-utils` requires `undici ^5.29.0`. Getting the fix means upgrading
+the parent package, or overriding the version and hoping nothing breaks. `tar` is the same story
+with `sqlite3`.
+
+Gating rule 3 says "blocks if a fix is available". For transitive dependencies, a fix on another
+major line isn't always actionable. Consider this for phase 7: triage could report "fix requires
+a major upgrade of `<parent>`" so a developer knows what the fix actually costs.
+
+## Notes for phase 7
+
+- **Tell image from fs by `ArtifactType` (`container_image` / `filesystem`) and `Class`, never by
+  name.** In CI the image is scanned from a tar (`--input`), so `ArtifactName` and the OS
+  `Target` become `/in/juice-shop.tar`, not `juice-shop:local` as in the local reports.
+- **Take the parser fixtures from the CI `trivy-reports` artifact**, not from local runs.
+- `FixedVersion` is a list (above); non-CVE IDs can't be checked against KEV (above);
+  frontend-lockfile findings need their own label (above).
+
+## `.trivyignore`
+
+**Nothing is ignored.** The deliberate findings are gating decisions, and they belong in
+`triage/waivers.yaml` (phase 7) with an owner and an expiry date. They don't belong in a scanner
+config that hides them from the report. The "probably not reachable" findings stay visible as
+well: grep-level evidence is a reason to deprioritise, not to suppress.
+
+## Phase 8 candidates
+
+1. **Reproducible install:** `npm ci --omit=dev` instead of `npm install` + `npm dedupe` (finding
+   above).
+2. **Dependency bump:** none of the top packages is a simple same-major bump: `multer` needs
+   1 → 2, and `undici` and `tar` need parent upgrades. Before picking one, list the High/Critical
+   findings whose fix is on the *installed* major line. Those are the cheap bumps.

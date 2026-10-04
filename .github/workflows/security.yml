@@ -1,5 +1,5 @@
 # Build the Juice Shop image and run the security scanners.
-# Phase 1: build. Phase 2: gitleaks. Scan jobs (phases 3-6) and the triage gate (phase 7) are
+# Phase 1: build. Phase 2: gitleaks. Phase 3: trivy. Scan jobs (phases 4-6) and the triage gate (phase 7) are
 # added one at a time. Scan jobs never fail on findings: they upload their report as an
 # artifact, and triage is the only job that decides pass/fail.
 #
@@ -28,6 +28,19 @@ jobs:
 
       - name: Build image
         run: docker build -t juice-shop:ci ./app
+
+      # Scan jobs that need the image (trivy, later zap) get it as a tar instead of rebuilding.
+      # upload-artifact zips it (~115 MB). Kept for 1 day: it's only needed within this run.
+      - name: Save image
+        run: docker save juice-shop:ci -o "$RUNNER_TEMP/juice-shop.tar"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: juice-shop-image
+          path: ${{ runner.temp }}/juice-shop.tar
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0 # image layers are already compressed
 
   gitleaks:
     runs-on: ubuntu-24.04
@@ -95,3 +108,105 @@ jobs:
           path: reports/gitleaks.json
           if-no-files-found: error # a missing report must not look like "no findings"
           retention-days: 7
+
+  trivy:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30 # two scans with --timeout 10m each, plus a DB download on a cold cache
+    permissions:
+      contents: read
+    env:
+      TRIVY_IMAGE: aquasec/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: juice-shop-image
+          path: ${{ runner.temp }}
+
+      # Vulnerability DB cache (~100 MB download, 1.4 GB on disk). Trivy re-downloads the DB
+      # once it is older than its NextUpdate (24 h after it was built), so the cache is keyed on
+      # the DB's own UpdatedAt, not the date: restore the newest entry, and save only when the
+      # scan fetched a newer DB. That's one save per DB build. Only db/ is cached; Trivy's
+      # per-layer scan cache (fanal/) would grow with every rebuild of the image.
+      - name: Restore Trivy DB
+        id: db-restore
+        uses: actions/cache/restore@v6
+        with:
+          path: .cache/trivy/db
+          key: trivy-db-restore # never saved under this name; restore-keys picks the newest
+          restore-keys: trivy-db-
+
+      # Scans run one after the other: they share the DB cache, which allows one process at a time.
+      # --input reads the saved tar, so the container never gets the Docker socket.
+      # No --ignore-unfixed and no --severity: triage needs every finding (KEV applies at any
+      # severity, and unfixed ones are reported without blocking). The exit code stays at Trivy's
+      # default 0 on findings, so a non-zero exit is a real error and fails the job.
+      - name: Scan image and lockfiles
+        run: |
+          set -euo pipefail
+          mkdir -p reports .cache/trivy
+          trivy() {
+            docker run --rm --user "$(id -u):$(id -g)" \
+              -v "$PWD:/src" -v "$RUNNER_TEMP:/in:ro" -v "$PWD/.cache/trivy:/cache" \
+              "$TRIVY_IMAGE" --cache-dir /cache --skip-version-check --disable-telemetry "$@"
+          }
+          trivy image --input /in/juice-shop.tar --scanners vuln --skip-java-db-update \
+            --format json --list-all-pkgs --timeout 10m -o /src/reports/trivy-image.json
+          trivy fs --scanners vuln --skip-java-db-update \
+            --format json --list-all-pkgs --timeout 10m -o /src/reports/trivy-fs.json /src/app
+
+      # A scan can succeed and still cover less than expected, e.g. OS detection fails and every
+      # OS-package CVE silently disappears. A clean scan still lists packages; a broken one doesn't.
+      - name: Check scan coverage
+        run: |
+          set -euo pipefail
+          pkgs() { jq --arg c "$2" '[.Results[]? | select(.Class == $c) | .Packages // [] | length] | add // 0' "$1"; }
+          fail=0
+          os=$(jq -r '.Metadata.OS.Family // empty' reports/trivy-image.json)
+          [ -n "$os" ] || { echo "::error::image scan: no OS detected, OS packages were not scanned"; fail=1; }
+          [ "$(pkgs reports/trivy-image.json os-pkgs)" -gt 0 ] || { echo "::error::image scan: 0 OS packages"; fail=1; }
+          [ "$(pkgs reports/trivy-image.json lang-pkgs)" -gt 0 ] || { echo "::error::image scan: 0 npm packages"; fail=1; }
+          for lock in package-lock.json frontend/package-lock.json; do
+            n=$(jq --arg t "$lock" '[.Results[]? | select(.Target == $t) | .Packages // [] | length] | add // 0' reports/trivy-fs.json)
+            [ "$n" -gt 0 ] || { echo "::error::fs scan: $lock not scanned"; fail=1; }
+          done
+          jq -r '"image: \(.Metadata.OS.Family) \(.Metadata.OS.Name)"' reports/trivy-image.json
+          for f in reports/trivy-image.json reports/trivy-fs.json; do
+            jq -r --arg f "$f" '.Results[]? | "\($f) \(.Target): \(.Packages // [] | length) packages, \(.Vulnerabilities // [] | length) vulnerability rows"' "$f"
+          done
+          exit "$fail"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: trivy-reports
+          path: |
+            reports/trivy-image.json
+            reports/trivy-fs.json
+          if-no-files-found: error
+          retention-days: 7
+
+      # A report that failed the coverage check is still useful for debugging. It's uploaded
+      # under a different name so triage can never mistake it for a good one.
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: trivy-reports-incomplete
+          path: reports/trivy-*.json
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Trivy DB cache key
+        id: db-version
+        run: |
+          set -euo pipefail
+          v=$(jq -r '.UpdatedAt' .cache/trivy/db/metadata.json | tr -c 'A-Za-z0-9\n' '-')
+          echo "key=trivy-db-$v" >> "$GITHUB_OUTPUT"
+
+      - name: Save Trivy DB
+        if: steps.db-restore.outputs.cache-matched-key != steps.db-version.outputs.key
+        uses: actions/cache/save@v6
+        with:
+          path: .cache/trivy/db
+          key: ${{ steps.db-version.outputs.key }}
