@@ -1,0 +1,27 @@
+# Semgrep ignore list (gitignore syntax). Every entry needs a reason (.claude/rules/ground-rules.md).
+#
+# A custom .semgrepignore REPLACES Semgrep's built-in defaults. Verified 2026-10-04 with
+# Semgrep 1.179.0: with only the codefixes/ line, 149 files under app/test/ and both *.min.js
+# files were scanned. So the defaults that matter here are restated below.
+
+# Coding-challenge answer options: read as text by routes/vulnCodeFixes.ts and
+# routes/vulnCodeSnippet.ts and shown in the UI; never imported or executed. Findings there
+# can't be exploited, and many files are fragments that don't parse (30 of 39 parse failures).
+app/data/static/codefixes/
+
+# Tests (app/test/ restates a default; *.spec.ts adds the frontend's unit tests). Gating rule 4
+# excludes tests, and their fake tokens are already covered (and allowlisted) by Gitleaks.
+app/test/
+*.spec.ts
+
+# Third-party code shipped as files, not first-party (*.min.js restates a default).
+# three.js is a bundled copy of the three.js library: it fails to parse and caused all 3
+# timeouts in the first scan.
+*.min.js
+app/frontend/src/assets/private/three.js
+
+# Dependencies and build output (restated defaults). Not tracked in git, but listed in case a
+# local scan runs after npm install or a frontend build.
+node_modules/
+dist/
+build/
