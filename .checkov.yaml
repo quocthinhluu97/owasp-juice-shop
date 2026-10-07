@@ -1,0 +1,12 @@
+framework:
+  - dockerfile
+  - github_actions
+
+skip-path:
+  # app/test/ contains upstream's smoke-test container (Alpine + curl, used only
+  # by upstream's docker-compose.test.yml); this pipeline never builds or runs it.
+  # Same rule as Semgrep (.semgrepignore) and gating rule 4: tests aren't scanned for gating.
+  - app/test/
+
+soft-fail: true
+skip-download: true
