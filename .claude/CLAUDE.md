@@ -12,6 +12,7 @@ Detailed instructions live in `.claude/rules/`, one file per topic:
 |---|---|---|
 | `ground-rules.md` | Non-negotiables: safety, suppression, secrets, scanner output | always |
 | `working-conventions.md` | How Claude works on this repo, shell (Linux/bash) | always |
+| `feature-pipeline.md` | researcher → plan-writer → human review → implementer → code-reviewer | always |
 | `layout.md` | Target repo layout | always |
 | `phases.md` | The nine phases and each scanner's setup | always |
 | `local-scanning.md` | Running scanners locally on Linux / WSL2 | always |

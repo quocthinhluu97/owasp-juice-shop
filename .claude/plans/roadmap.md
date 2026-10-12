@@ -11,8 +11,8 @@ Status: ✅ done · ▶ in progress · ☐ not started
 | 1 | App + Dockerfile + minimal workflow | ✅ |
 | 2 | Gitleaks: secrets in git history | ✅ |
 | 3 | Trivy: vulnerable packages in image and repo | ✅ |
-| 4 | Semgrep: insecure code patterns | ▶ |
-| 5 | Checkov: Dockerfile and workflow misconfiguration | ☐ |
+| 4 | Semgrep: insecure code patterns | ✅ |
+| 5 | Checkov: Dockerfile and workflow misconfiguration | ▶ |
 | 6 | ZAP baseline: passive scan of the running app | ☐ |
 | 7 | Triage script: one pass/fail decision | ☐ |
 | 8 | Fix a few findings | ☐ |
@@ -93,7 +93,7 @@ Goal: find known-vulnerable packages (CVEs) in the built image and in the repo's
 8. ✅ CI job `trivy`: `build` saves the image as an artifact (1 day); `trivy` scans it with `--input` (no Docker socket), then the lockfiles; DB cached daily; a coverage check fails the job if no OS was detected or a lockfile wasn't scanned. Original step: needs the image, so either build it in the same job or pass it via `docker save` as an artifact. JSON uploaded as an artifact.
 9. ✅ Review, PR, merge (PR #2). CI matched the local run except 1 fewer npm row in the image scan (lockfile scan unchanged), likely build-to-build drift.
 
-## Phase 4: Semgrep ▶
+## Phase 4: Semgrep ✅
 
 Goal: find insecure patterns in first-party code.
 
@@ -104,9 +104,11 @@ Goal: find insecure patterns in first-party code.
 5. ✅ `.semgrepignore`: a custom file **replaces** Semgrep's defaults (verified), so they're restated. Secret rules stay on; triage merges `generic.secrets.*` with Gitleaks, never gates. Terraform and `.npmrc` non-gating: named exclusions added to gating rule 4 (exclusion form kept, not an allow-list). Original step: `.semgrepignore` with a reason per path (`codefixes/`, `test/`, built frontend output). Leave `routes/` and `lib/` fully scanned.
 6. ✅ Re-run: 55 → 37 findings, exactly the 15 `codefixes/` + 3 `*.spec.ts` ones; errors 41 → 8.
 7. ✅ CI job `semgrep`: JSON (for triage) + SARIF artifact; coverage check fails if any tracked first-party server file (`routes/`, `lib/`, `models/`, `data/*.ts`, `views/`, `server.ts`, `app.ts`; 121 files) wasn't scanned or any error other than Angular-template partial parsing appears.
-8. ☐ Review, PR, merge.
+8. ✅ Review, PR, merge (PR #3). CI matched the local run exactly (688 files, 8 errors, 37 findings).
 
-## Phase 5: Checkov ☐
+## Phase 5: Checkov ▶
+
+Plan: [phase-5-checkov.md](phase-5-checkov.md) — approved 2026-10-07; implemented; review clean; awaiting commit
 
 Goal: find misconfiguration in the Dockerfile and the GitHub workflows.
 
