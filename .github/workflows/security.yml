@@ -1,5 +1,5 @@
 # Build the Juice Shop image and run the security scanners.
-# Phase 1: build. Phase 2: gitleaks. Phase 3: trivy. Phase 4: semgrep. Phase 5: checkov.
+# Phase 1: build. Phase 2: gitleaks. Phase 3: trivy. Phase 4: semgrep. Phase 5: checkov. Phase 6: zap.
 # Scan jobs never fail on findings: they upload their report as an artifact, and triage (phase 7)
 # is the only job that decides pass/fail.
 #
@@ -30,7 +30,7 @@ jobs:
       - name: Build image
         run: docker build -t juice-shop:ci ./app
 
-      # Scan jobs that need the image (trivy, later zap) get it as a tar instead of rebuilding.
+      # Scan jobs that need the image (trivy, zap) get it as a tar instead of rebuilding.
       # upload-artifact zips it (~115 MB). Kept for 1 day: it's only needed within this run.
       - name: Save image
         run: docker save juice-shop:ci -o "$RUNNER_TEMP/juice-shop.tar"
@@ -399,5 +399,201 @@ jobs:
         with:
           name: checkov-reports-incomplete
           path: reports/checkov/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # Passive ZAP baseline against the app, on an --internal network (no internet egress, no
+  # published port). Design and decisions D1-D12: .claude/plans/phase-6-zap.md.
+  zap:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      ZAP_IMAGE: ghcr.io/zaproxy/zaproxy:2.17.0@sha256:7aaa659b0d43078febd82e29bad112285c370727e86ab8340444220e17d9f0d2
+      # pscanrulesBeta v50 (6 rules), pinned by hash (D12). Dependabot can't see it: bump by hand
+      # with the ZAP image (see .claude/rules/local-scanning.md).
+      ZAP_BETA_URL: https://github.com/zaproxy/zap-extensions/releases/download/pscanrulesBeta-v50/pscanrulesBeta-beta-50.zap
+      ZAP_BETA_SHA256: a979f7cd5d8be10e0338b417e006ec1e2f6ec79101010d570ddb5199892e921b
+      # Coverage floors for the check below (D7). Local runs gave 135-177 endpoints for the Juice
+      # Shop site and 67 rules; a scan that only reached "/" gives a handful of endpoints.
+      ZAP_MIN_ENDPOINTS: 100
+      ZAP_MIN_RULES: 67
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: juice-shop-image
+          path: ${{ runner.temp }}
+
+      - name: Load image
+        run: docker load -i "$RUNNER_TEMP/juice-shop.tar"
+
+      # Fetched and hash-checked before anything runs with it. A mismatch fails the job.
+      - name: Download and verify pscanrulesBeta
+        run: |
+          set -euo pipefail
+          addon="$RUNNER_TEMP/pscanrulesBeta-beta-50.zap"
+          curl -fsSL -o "$addon" "$ZAP_BETA_URL"
+          echo "$ZAP_BETA_SHA256  $addon" | sha256sum -c -
+
+      # Pulled before the app starts, so a cold pull doesn't use up the 120 s readiness window below.
+      - name: Pull ZAP image
+        run: docker pull "$ZAP_IMAGE"
+
+      # --internal: neither container can reach the internet, and the app has no published port.
+      # ZAP reaches it at http://juice:3000 (D3). Docker's embedded DNS resolves "juice" on this network.
+      # No --rm: if juice crashes, its logs must survive for the `docker logs juice` calls below
+      # (--rm would remove the container on exit).
+      - name: Start app on internal network
+        run: |
+          set -euo pipefail
+          docker network create --internal scan
+          docker run -d --network scan --name juice juice-shop:ci
+
+      # The app image is distroless (no curl), so the ZAP image's curl polls it from the same network (D9).
+      # Juice Shop seeds its data before it listens, so the first 200 means ready.
+      - name: Wait for app
+        run: |
+          set -euo pipefail
+          deadline=$((SECONDS + 120))
+          until docker run --rm --network scan "$ZAP_IMAGE" curl -sf --max-time 5 -o /dev/null http://juice:3000/; do
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error::app not ready after 120 s"; docker logs juice; exit 1
+            fi
+            sleep 3
+          done
+
+      # ZAP runs as UID 1000, not the runner's UID (D8). Only this one dir is opened up, not the
+      # workspace. The rules file goes next to the output because -c is relative to /zap/wrk.
+      - name: Prepare ZAP work dir
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/zap"
+          mkdir -p "$work"
+          chmod 0777 "$work"
+          cp .zap/rules.tsv "$work/rules.tsv"
+
+      # -j: Client Spider (D4). The add-on is mounted read-only; -z "-silent" stops zap-baseline.py
+      # from trying to update add-ons, which needs the internet (D12).
+      # Findings never fail this step (triage gates). Exit 0 = clean, 1 = a FAIL rule fired,
+      # 2 = WARN only. Exit 1 is also what a Python crash returns, so the coverage check below
+      # must run after this step: it decides whether the scan really happened.
+      - name: Run ZAP baseline
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/zap"
+          rc=0
+          docker run --rm --network scan \
+            -v "$work:/zap/wrk:rw" \
+            -v "$RUNNER_TEMP/pscanrulesBeta-beta-50.zap:/zap/plugin/pscanrulesBeta-beta-50.zap:ro" \
+            "$ZAP_IMAGE" \
+            zap-baseline.py -t http://juice:3000 -j -z "-silent" -c rules.tsv -J zap.json -r zap.html \
+            2>&1 | tee "$work/zap-console.txt" || rc=$?
+          echo "zap-baseline.py exit code: $rc"
+          case "$rc" in
+            0|1|2) ;;
+            *) echo "::error::zap-baseline.py exited $rc; expected 0, 1 or 2"; exit 1 ;;
+          esac
+
+      # Runs after the scan step, including when it exited 1 (D7). Checks that zap.json parses, that
+      # the Juice Shop site has enough endpoints (the spider really ran), and that enough rules ran
+      # (all 67 passive rules, including the beta add-on). Thresholds are in the env block above.
+      - name: Check scan coverage
+        run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP/zap" <<'EOF'
+          import json, os, re, sys
+
+          work = sys.argv[1]
+          site_name = "http://juice:3000"
+          min_endpoints = int(os.environ["ZAP_MIN_ENDPOINTS"])
+          min_rules = int(os.environ["ZAP_MIN_RULES"])
+          problems = []
+          endpoints = 0
+          rules = 0
+
+          # 1. zap.json exists and parses. A crashed zap-baseline.py (e.g. a missing -c file) never writes it.
+          report = None
+          try:
+              with open(os.path.join(work, "zap.json")) as f:
+                  report = json.load(f)
+          except (OSError, ValueError) as e:
+              problems.append(f"zap.json missing or not valid JSON: {e}")
+
+          if report is not None:
+              # 2. The Juice Shop site is in the report. Select by name, never by index: the open redirect
+              #    adds other sites to site[] (D7).
+              if not any(s.get("@name") == site_name for s in report.get("site", [])):
+                  problems.append(f"no site entry named {site_name} in zap.json")
+              # 3. Endpoint count for the same site, from the top-level insights[].
+              counts = [int(i["statistic"]) for i in report.get("insights", [])
+                        if i.get("site") == site_name and i.get("key") == "insight.endpoint.total"]
+              endpoints = counts[0] if counts else 0
+              if endpoints < min_endpoints:
+                  problems.append(f"{site_name} has {endpoints} endpoints, need at least {min_endpoints}")
+
+          # 4. Rules that ran: the console summary line totals every rule in each category.
+          summary = None
+          try:
+              with open(os.path.join(work, "zap-console.txt"), errors="replace") as f:
+                  for line in f:
+                      m = re.search(r"\bFAIL-NEW: \d+", line)
+                      if m:
+                          summary = line[m.start():]
+          except OSError as e:
+              problems.append(f"zap-console.txt unreadable: {e}")
+          rule_keys = ["FAIL-NEW", "FAIL-INPROG", "WARN-NEW", "WARN-INPROG", "INFO", "IGNORE", "PASS"]
+          if summary is None:
+              problems.append("no rule summary line (FAIL-NEW: ...) in zap-console.txt")
+          else:
+              totals = dict(re.findall(r"([A-Z-]+): (\d+)", summary))
+              missing = [k for k in rule_keys if k not in totals]
+              if missing:
+                  problems.append(f"rule summary is missing {', '.join(missing)}")
+              else:
+                  rules = sum(int(totals[k]) for k in rule_keys)
+                  if rules < min_rules:
+                      problems.append(f"{rules} rules ran, need at least {min_rules} (beta add-on not loaded?)")
+
+          if problems:
+              for p in problems:
+                  print(f"::error::ZAP coverage check failed: {p}")
+              sys.exit(1)
+          print(f"ZAP coverage OK: {endpoints} endpoints for {site_name}, {rules} rules ran")
+          EOF
+
+      # Copies whatever ZAP wrote, even after a failed scan or coverage check, so the
+      # -incomplete artifact has something to debug with.
+      - name: Copy report to reports/
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p reports/zap
+          for f in zap.json zap.html zap-console.txt; do
+            if [ -f "$RUNNER_TEMP/zap/$f" ]; then cp "$RUNNER_TEMP/zap/$f" reports/zap/; fi
+          done
+
+      - name: Print app logs on failure
+        if: failure()
+        run: docker logs juice 2>&1 || true
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: zap-report
+          path: |
+            reports/zap/zap.json
+            reports/zap/zap.html
+            reports/zap/zap-console.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: zap-report-incomplete
+          path: reports/zap/
           if-no-files-found: ignore
           retention-days: 7

@@ -12,8 +12,8 @@ Status: ✅ done · ▶ in progress · ☐ not started
 | 2 | Gitleaks: secrets in git history | ✅ |
 | 3 | Trivy: vulnerable packages in image and repo | ✅ |
 | 4 | Semgrep: insecure code patterns | ✅ |
-| 5 | Checkov: Dockerfile and workflow misconfiguration | ▶ |
-| 6 | ZAP baseline: passive scan of the running app | ☐ |
+| 5 | Checkov: Dockerfile and workflow misconfiguration | ✅ |
+| 6 | ZAP baseline: passive scan of the running app | ▶ |
 | 7 | Triage script: one pass/fail decision | ☐ |
 | 8 | Fix a few findings | ☐ |
 | 9 | Lock down the pipeline | ☐ |
@@ -106,32 +106,38 @@ Goal: find insecure patterns in first-party code.
 7. ✅ CI job `semgrep`: JSON (for triage) + SARIF artifact; coverage check fails if any tracked first-party server file (`routes/`, `lib/`, `models/`, `data/*.ts`, `views/`, `server.ts`, `app.ts`; 121 files) wasn't scanned or any error other than Angular-template partial parsing appears.
 8. ✅ Review, PR, merge (PR #3). CI matched the local run exactly (688 files, 8 errors, 37 findings).
 
-## Phase 5: Checkov ▶
+## Phase 5: Checkov ✅
 
-Plan: [phase-5-checkov.md](phase-5-checkov.md) — approved 2026-10-07; implemented; review clean; awaiting commit
+Plan: [phase-5-checkov.md](phase-5-checkov.md) — approved 2026-10-07; merged in PR #4 (f66bb8d)
 
 Goal: find misconfiguration in the Dockerfile and the GitHub workflows.
 
-1. ☐ Research: current Checkov version and digest; check IDs for root user / no `USER`, unpinned actions, script injection, base image not pinned by digest.
-2. ☐ Run with `--framework dockerfile github_actions` → SARIF in `reports/`.
-3. ☐ Summarise. Check which deferred items in `security.yml` Checkov actually flags; the code-reviewer believes tag-pinned actions and `persist-credentials` are not covered and need zizmor (unverified). Expect hits on **our own** phase 1 workflow (unpinned actions, etc.) and on the Dockerfile (base image by tag, maybe no `HEALTHCHECK`). `app/terraform/` is out of scope for these frameworks.
-4. ☐ Write `docs/findings/checkov.md`.
-5. ☐ Draft the **short list of high-impact check IDs** for gating rule 5, with a reason for each. This becomes code in phase 7.
-6. ☐ `.checkov.yaml`: frameworks, paths, and skips with reasons.
-7. ☐ CI job `checkov`, SARIF artifact.
-8. ☐ Review, PR, merge.
+1. ✅ (researcher) Checkov **3.3.22**, `sha256:617c76e3f9b1f7907ebca9abb6b9d746844edcb48e9bd775e4692c69c1c6ac47`. Gaps: no digest-pinning check (base pin in phase 8), no action-pinning check (zizmor phase 9).
+2. ✅ Local: dockerfile 324/3, github_actions 108/0. Final local re-run with CI's exact flags (after the `checkov` job was added): dockerfile 324/3, github_actions 132/0 (more workflow resources). JSON + SARIF to `reports/checkov/`.
+3. ✅ Verdict: CKV_DOCKER_7 (untagged distroless base at line 22) blocks gating; CKV_DOCKER_2 (no HEALTHCHECK) report-only. GitHub Actions: all checks pass. See `docs/findings/checkov.md`.
+4. ✅ `docs/findings/checkov.md`: scan summary, 3 Dockerfile failure verdicts, GitHub Actions results, Checkov limitations, severity=null, output-write lesson, framework-wide scope limits, phase 7 notes.
+5. ✅ Rule 5 check list decided: **gate** CKV_DOCKER_3, CKV_DOCKER_8, CKV_DOCKER_1, CKV_DOCKER_7, CKV_GHA_2, CKV2_GHA_1, CKV_GHA_1; **report-only** CKV_DOCKER_2 (scoped to `/app/Dockerfile` and `/.github/workflows/`). Recorded in `gating-policy.md` rule 5.
+6. ✅ `.checkov.yaml`: framework [dockerfile, github_actions], skip-path app/test/, soft-fail true, skip-download true. Local re-run: 3 failures (skip-path dropped test/smoke, down from 6).
+7. ✅ CI job `checkov`: pinned image by digest, `--network none`, `--config-file`, JSON + SARIF to `reports/checkov/`. Coverage check: file existence, parsing_errors==0, both frameworks present, no log errors. Never fails on findings.
+8. ✅ Reviewed (3 fix rounds); merged PR #4 (f66bb8d). Final verification matched expected counts (dockerfile 324/3, github_actions 132/0).
 
-## Phase 6: ZAP baseline ☐
+## Phase 6: ZAP baseline ▶
+
+Plan: [phase-6-zap.md](phase-6-zap.md) — approved 2026-10-12; amendment D12 + step 3c approved 2026-10-12
 
 Goal: passively scan the running app over HTTP (no attacks).
 
-1. ☐ Research: current ZAP image and digest; `zap-baseline.py` flags (`-J`, `-c`/`-g` for the rules file).
-2. ☐ Run against the local container → `reports/zap.json`, using `--add-host=host.docker.internal:host-gateway`.
-3. ☐ Generate the default rules file (`-g`), then set every rule to IGNORE, WARN or FAIL in `.zap/rules.tsv`, **each with a reason**. Juice Shop is a single-page app, so the passive spider sees little; note this as a limitation.
-4. ☐ Summarise: missing security headers (CSP, etc.), cookie flags, information leaks. Pick one header as the phase 8 fix.
-5. ☐ Write `docs/findings/zap.md`.
-6. ☐ CI job `zap`: start the built image as a container, wait until it's ready, run the scan, upload the JSON. The app is only reachable inside the runner.
-7. ☐ Review, PR, merge.
+1. ✅ (researcher) ZAP **2.17.0** (stable, rebuilt monthly; digest verified). Confirmed: `-j` = Client Spider. `-T` not needed (CI `timeout-minutes: 20`; runs take ~2:40).
+2. ✅ Run traditional spider against local container → `reports/zap.json`, on network `scan` (target `http://juice:3000`). Exit 2, 36 s, 88 URLs, 65 endpoints scanned. Findings: 10038 CSP, 10098 ACAO, 10110 DOM-XSS, 90004 hardening, 10063 Deprecated Feature-Policy (not Permissions-Policy), 10096 timestamps, Info alerts. Stack trace leaked on 403 /ftp/encrypt.pyc. D3 amendment: network must be `--internal` to block scope creep (Client Spider followed open redirect to GitHub in the -j run).
+3. ✅ Client Spider run: 2:48 total (+2:12), 134 endpoints, 16 alert types. New: 10028 open redirect (High), private IPs, session ID noise, socket.io noise. **Decision D4 resolved:** use `-j` (2× coverage, only 1 High alert, +2:12 < 5 min budget). Coverage signal for D7: set after --internal verification (step 3b).
+4. ✅ Verify --internal network (step 3b): `docker network create --internal scan`, one `-j` run. Exit 2, 2:48, only juice:3000 in sites, 135 endpoints, but 7 alerts from 4 rules vanished (missing pscanrulesBeta add-on). **Decision D12 proposed (step 3c):** pin add-on v50 by hash, verify all 67 rules load, mount read-only in CI, run with `-z "-silent"`.
+5. ✅ Verify pinned add-on (step 3c, 2026-10-13): pscanrulesBeta v50 hash-checked and mounted read-only with `-z "-silent"`; 67 rules loaded (PASS 54 + WARN 13); 10110/10063/90004/10049 back; exit 2, 2:36.
+6. ✅ Generate rules file from `gen.conf`, set every rule to IGNORE/WARN/FAIL with reason in `.zap/rules.tsv`. Drafted 2026-10-13: 68 rules (FAIL 3: 10038, 10028, 10115, confirmed by user 2026-10-13; IGNORE 10; WARN 55), reviewed in step 9 (clean 2026-10-13).
+7. ✅ Re-run with rules file (2026-10-13): exit 1, 2:34. Console FAIL 2 (10028, 10038), WARN 7, IGNORE 4 (10049, 10096, 10109, 3), PASS 54 = 67; only juice:3000 in `site[]`, 174 endpoints, same 17 alertRefs as the pinned run. Exit 1 is expected (FAIL rules fired), but a missing rules file also exits 1, so the CI coverage check must run (see plan D7 correction).
+8. ✅ Write `docs/findings/zap.md`: summary, per-alert verdicts, JSON caps and fingerprint notes (D10), chosen phase 8 header.
+9. ▶ CI job `zap` written (2026-10-13): network `--internal`, pinned add-on, spider `-j`, rules file, coverage check on Juice site endpoint count and rule load (≥67). The app is only reachable inside the runner. CI check pending the first PR run (plan step 7).
+10. ✅ Docs written (2026-10-13): `local-scanning.md` (add-on, --internal), `phases.md` phase 6 (rules.tsv read by triage), `layout.md`.
+11. ✅ Review: round 1 (2026-10-13) found no bugs; fixes applied; round 2 clean (2026-10-13) (plan step 9). Then PR and merge.
 
 ## Phase 7: Triage script ☐
 
@@ -187,7 +193,7 @@ Goal: the pipeline itself is hard to abuse (`ci-workflows.md`).
 | When | Decision |
 |---|---|
 | Phase 2 | What to do if a hit looks like a real secret (rotate it, even here). |
-| Phase 5 | The exact list of high-impact Checkov check IDs for gating rule 5. |
+| Phase 5 | The exact list of high-impact Checkov check IDs for gating rule 5. — **decided:** see `gating-policy.md` rule 5 |
 | Phase 6 | Which ZAP rules are FAIL. |
 | Phase 8 | Which ~4 findings to fix. |
 | Phase 9 | Whether to do the OIDC publish step at all. |
