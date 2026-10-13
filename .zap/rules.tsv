@@ -1,0 +1,73 @@
+# ZAP baseline rules (phase 6). Format: <pluginid>\t<LEVEL>\t(<name>)\t<reason>
+# Levels: FAIL = gating rule 6 (.claude/rules/gating-policy.md); WARN = reported, not gating;
+# IGNORE = known noise for this app, still in the JSON report. Keyed by plugin id, so all
+# variants (e.g. 10049-1/-2/-3) share a level. Started from gen.conf (ZAP 2.17.0 + pscanrulesBeta v50).
+# Plugin ids not listed here are report only (phase 7 triage default).
+10003	WARN	(Vulnerable JS Library (Powered by Retire.js))	Dependency CVEs are gated by Trivy (rules 2-3); bundled JS hides versions from Retire.js.
+10009	WARN	(In Page Banner Information Leak)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10010	WARN	(Cookie No HttpOnly Flag)	Cookie flags: report; session token is a JS-set cookie, review if a server cookie fires.
+10011	WARN	(Cookie Without Secure Flag)	Cookie flags: report; app runs on plain HTTP locally/in CI, so Secure can't be judged here.
+10015	WARN	(Re-examine Cache-control Directives)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10017	WARN	(Cross-Domain JavaScript Source File Inclusion)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10019	WARN	(Content-Type Header Missing)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10020	WARN	(Anti-clickjacking Header)	Fires only on socket.io polling responses (helmet frameguard covers HTML); not framed, so not gating.
+10021	WARN	(X-Content-Type-Options Header Missing)	Fires only on socket.io polling responses (helmet noSniff covers the rest); not gating.
+10023	WARN	(Information Disclosure - Debug Error Messages)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10024	WARN	(Information Disclosure - Sensitive Information in URL)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10025	WARN	(Information Disclosure - Sensitive Information in HTTP Referrer Header)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10026	WARN	(HTTP Parameter Override)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10027	WARN	(Information Disclosure - Suspicious Comments)	Minified bundles hide comments; slow on main.js. Report if it fires.
+10028	FAIL	(Off-site Redirect)	Gating rule 6: open redirect on our own origin is a phishing/token-theft tool; fix is an exact-match allowlist.
+10029	WARN	(Cookie Poisoning)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10030	WARN	(User Controllable Charset)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10031	WARN	(User Controllable HTML Element Attribute (Potential XSS))	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10032	WARN	(Viewstate)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
+10033	WARN	(Directory Browsing)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10034	WARN	(Heartbleed OpenSSL Vulnerability (Indicative))	Report only: plain HTTP in the scan, no TLS to check.
+10035	WARN	(Strict-Transport-Security Header)	Plain HTTP in the scan; HSTS belongs to the TLS-terminating front end. Report if it fires.
+10036	WARN	(HTTP Server Response Header)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10037	WARN	(Server Leaks Information via "X-Powered-By" HTTP Response Header Field(s))	helmet hides X-Powered-By; report a regression.
+10038	FAIL	(Content Security Policy (CSP) Header Not Set)	Gating rule 6: no CSP lets any XSS run arbitrary script; high confidence; fix is one header (phase 8 candidate).
+10039	WARN	(X-Backend-Server Header Information Leak)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10040	WARN	(Secure Pages Include Mixed Content)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10041	WARN	(HTTP to HTTPS Insecure Transition in Form Post)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10042	WARN	(HTTPS to HTTP Insecure Transition in Form Post)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10043	WARN	(User Controllable JavaScript Event (XSS))	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10044	WARN	(Big Redirect Detected (Potential Sensitive Information Leak))	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10049	IGNORE	(Content Cacheability)	Informational cacheability notes (-1/-2/-3); no security impact for this app.
+10050	WARN	(Retrieved from Cache)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10052	WARN	(X-ChromeLogger-Data (XCOLD) Header Information Leak)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
+10054	WARN	(Cookie without SameSite Attribute)	Cookie flags: report; review if a server-set session cookie fires.
+10055	WARN	(CSP)	Weak CSP directives: becomes relevant once a CSP exists (phase 8). Report.
+10056	WARN	(X-Debug-Token Information Leak)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
+10057	WARN	(Username Hash Found)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10061	WARN	(X-AspNet-Version Response Header)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
+10062	WARN	(PII Disclosure)	PII patterns (e.g. card numbers) false-positive often; report if it fires.
+10063	WARN	(Permissions Policy Header Not Set)	Real, minor: deprecated Feature-Policy header sent instead of Permissions-Policy (phase 8 candidate).
+10096	IGNORE	(Timestamp Disclosure)	Noise: matches numeric constants in styles.css/index, not server times.
+10097	WARN	(Hash Disclosure)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10098	WARN	(Cross-Domain Misconfiguration)	Real: ACAO * from cors(); auth is a Bearer token, so no authenticated cross-origin reads by itself.
+10099	WARN	(Source Code Disclosure)	Beta rule, prone to false positives on bundles; report if it fires.
+10105	WARN	(Weak Authentication Method)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10108	WARN	(Reverse Tabnabbing)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+10109	IGNORE	(Modern Web Application)	Informational: says the app is an SPA; covered by using the Client Spider (-j).
+10110	WARN	(Dangerous JS Functions)	Real: bypassSecurityTrustHtml (DOM-XSS challenge); low confidence, code gating is Semgrep's job (rule 4).
+10111	IGNORE	(Authentication Request Identified)	Informational: identifies authentication requests; not a vulnerability.
+10112	IGNORE	(Session Management Response Identified)	Informational: identifies session management responses; not a vulnerability.
+10113	IGNORE	(Verification Request Identified)	Informational: identifies verification requests; not a vulnerability.
+10115	FAIL	(Script Served From Malicious Domain (polyfill))	Gating rule 6: script from a known-compromised domain (polyfill.io); never a false positive.
+10116	IGNORE	(ZAP is Out of Date)	ZAP version is pinned by digest on purpose and -silent disables the check offline.
+10202	WARN	(Absence of Anti-CSRF Tokens)	SPA has no server-rendered forms; usually noise on SPAs. Report if it fires.
+2	WARN	(Private IP Disclosure)	Real, minor: private IP in unauthenticated /rest/admin/application-configuration.
+3	IGNORE	(Session ID in URL Rewrite)	Noise: the sid is socket.io's Engine.IO connection id, not an auth session.
+50001	WARN	(Script Passive Scan Rules)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+90001	WARN	(Insecure JSF ViewState)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
+90002	WARN	(Java Serialization Object)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+90003	WARN	(Sub Resource Integrity Attribute Missing)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+90004	WARN	(Insufficient Site Isolation Against Spectre Vulnerability)	Hardening only: COEP/COOP matter for SharedArrayBuffer-style isolation, which the app doesn't use.
+90011	WARN	(Charset Mismatch)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+90022	WARN	(Application Error Disclosure)	Not raised, but the 403 page on /ftp leaks a stack trace (found manually); report if it fires.
+90030	WARN	(WSDL File Detection)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
+90033	WARN	(Loosely Scoped Cookie)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
+50003	IGNORE	(Stats Passive Scan Rule)	Statistics-only rule; raises no findings.
+120000	IGNORE	(Information Disclosure - Information in Browser Storage)	Informational (client add-on): browser storage use, e.g. basket itemTotal in sessionStorage.

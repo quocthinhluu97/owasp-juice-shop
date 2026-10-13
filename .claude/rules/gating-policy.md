@@ -28,7 +28,16 @@ The rule should be one you could defend to a developer. Start here and change it
    - **`app/infrastructure/Dockerfile`** (all checks): **reported but never gating** (challenge material, like `app/terraform/` in rule 4; nothing builds it).
    - `app/test/` is excluded via `skip-path` in `.checkov.yaml` (upstream smoke-test container, never built), so it never reaches triage.
    - **Unpinned actions** (any `uses:` not pinned to a full commit SHA, including tags like `@v7`): Not detectable by Checkov (no check exists). Enforced from phase 9 by zizmor (`unpinned-uses`), added to the gate then.
-6. ZAP rules set to `FAIL` in `rules.tsv`.
+6. ZAP rules set to `FAIL` in `.zap/rules.tsv` (phase 6). Triage reads the levels from that file and matches on `pluginid`; the JSON report doesn't carry them:
+   - **10038** (CSP header not set): Without a CSP, any XSS runs arbitrary script, and Juice Shop has several. High confidence; the fix is one header.
+   - **10028** (off-site redirect): An open redirect on our own origin is a phishing and token-theft tool. The fix is an exact-match allowlist.
+   - **10115** (script served from a malicious domain, polyfill.io): A known supply-chain compromise; never a false positive.
+
+   Also not gating, each for a written reason (the 4th column of `rules.tsv`):
+   - **10020 / 10021** (anti-clickjacking, nosniff): only fire on `socket.io` polling responses, which are never framed or rendered; helmet covers the HTML pages. FAIL would block on a false positive.
+   - **10110** (dangerous JS functions): low confidence, fires on any use of the API; gating code is rule 4's job (Semgrep).
+   - **10003** (vulnerable JS library): dependency CVEs are rules 2–3's job (Trivy).
+   - IGNORE-level rules and plugin IDs not listed in `rules.tsv` (e.g. 120000 from the client add-on) are reported, never gating.
 
 Everything else goes into the report but doesn't block. The report must say **why** each blocking finding blocks, by naming the rule number above. A developer who sees a red build should know exactly what to do next.
 

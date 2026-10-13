@@ -1,6 +1,6 @@
 # Phase 5: Checkov (plan)
 
-Status: **approved 2026-10-07; implemented; review clean; awaiting commit** · Branch: `phase-5-checkov` · Pipeline: `.claude/rules/feature-pipeline.md`
+Status: ✅ **done — approved 2026-10-07; merged in PR #4 (f66bb8d)** · Branch: `phase-5-checkov` · Pipeline: `.claude/rules/feature-pipeline.md`
 
 ## Context
 
@@ -109,7 +109,9 @@ A check that fails today blocks the build from phase 7 until phase 8 fixes it, o
    - Upload `checkov-reports` (`if-no-files-found: error`, 7 days), plus `checkov-reports-incomplete` on failure.
    - **Verification:** actionlint not available locally (not run; CI will be the first real run). Coverage logic tested locally against the real step-2 report (pass) and doctored copies — workflow missing, parsing error > 0, empty dir, non-array JSON, framework missing, Checkov-format `[ERROR]` in stderr log, same in console.log (all fail as expected). Plus a console.log containing a literal `[ERROR]` inside a printed code line (passes, as required). Design detail: stderr goes to `checkov-stderr.log` (plain redirect), CLI stdout to `console.log`; the error check matches only Checkov's anchored log-line format (`YYYY-MM-DD HH:MM:SS,mmm [thread] [ERROR]`) so finding text can't fail the job. Outputs are written straight into `reports/checkov/`.
 6. ✅ **Update `phases.md`** (Checkov output: JSON for triage, SARIF from the same run) and the roadmap, steps 3–7.
-7. ✅ **Review (code-reviewer)** — three fix rounds (rule 5 split into gated / not-gating lists; `--framework` and `--skip-download` removed from CI job so `.checkov.yaml` is single source of truth, `--soft-fail` kept on CLI; `[CRITI]` added to error pattern; doc/comment fixes; local-scanning.md command matched to CI). Final verification: offline run with pinned image, exact CI flags, no `--framework`; config's `framework:` honored (dockerfile + github_actions only), skip-path and skip-download applied, exit 0, dockerfile 324 passed / 3 failed, github_actions 132 passed / 0 failed (larger than earlier 108 due to new resources), 0 ERROR/CRITICAL/WARNING log lines. Review clean. Awaiting commit (you).
+7. ✅ **Review (code-reviewer)** — three fix rounds (rule 5 split into gated / not-gating lists; `--framework` and `--skip-download` removed from CI job so `.checkov.yaml` is single source of truth, `--soft-fail` kept on CLI; `[CRITI]` added to error pattern; doc/comment fixes; local-scanning.md command matched to CI). Final verification: offline run with pinned image, exact CI flags, no `--framework`; config's `framework:` honored (dockerfile + github_actions only), skip-path and skip-download applied, exit 0, dockerfile 324 passed / 3 failed, github_actions 132 passed / 0 failed (larger than earlier 108 due to new resources), 0 ERROR/CRITICAL/WARNING log lines. Review clean. Committed and merged (PR #4).
+
+8. ✅ **PR, merge** (PR #4, f66bb8d). Branch `phase-5-checkov` merged to `main` (merge commit).
 
 ## Open questions for the user
 
