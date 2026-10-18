@@ -583,7 +583,7 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: zap-report-x
+          name: zap-report
           path: |
             reports/zap/zap.json
             reports/zap/zap.html
