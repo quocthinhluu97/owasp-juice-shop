@@ -9,15 +9,21 @@
   plans/                  persisted plans (roadmap.md: all phases)
 app/                      Juice Shop source (vendored at a pinned tag) + Dockerfile
 .github/workflows/
-  security.yml            build + scan jobs (gitleaks, trivy, semgrep, checkov, zap run in parallel) → triage gate (phase 7)
+  security.yml            build + scan jobs (gitleaks, trivy, semgrep, checkov, zap run in parallel) → triage job (phase 7) decides pass/fail
   deploy.yml              (optional) OIDC-authenticated deploy, final phase only
 .github/dependabot.yml    keeps pinned action SHAs and base images up to date
 triage/
-  triage.py               CLI entry point
-  parsers/                one module per scanner → common Finding model
-  policy.py               the gating rule
-  enrich.py               CISA KEV / EPSS lookup, reachability hints
+  triage.py               CLI entry point (exit 0 pass, 1 gate failed, 2 script error)
+  model.py                Finding model, explicit per-tool severity mapping
+  parsers/                one module per scanner (gitleaks, trivy, semgrep, checkov, zap) + common.py
+  dedupe.py               fingerprint dedupe; Semgrep secrets merged into Gitleaks
+  enrich.py               CISA KEV lookup, cached in triage/.cache/ (gitignored)
+  reachability.py         labels only: dependency type, image/fs presence, grep-level imports
+  policy.py               the gating rule (rules 1–6)
+  waivers.py              loads and applies waivers.yaml
   waivers.yaml            accepted exceptions
+  report.py               step summary and reports/triage.json
+  requirements.txt        pinned pytest and PyYAML
   tests/                  pytest, with real scanner output trimmed into fixtures/
 reports/                  raw scanner output (gitignored)
 docs/findings/            one note per scanner: what it found, what was noise, what was fixed

@@ -13,8 +13,8 @@ Status: ✅ done · ▶ in progress · ☐ not started
 | 3 | Trivy: vulnerable packages in image and repo | ✅ |
 | 4 | Semgrep: insecure code patterns | ✅ |
 | 5 | Checkov: Dockerfile and workflow misconfiguration | ✅ |
-| 6 | ZAP baseline: passive scan of the running app | ▶ |
-| 7 | Triage script: one pass/fail decision | ☐ |
+| 6 | ZAP baseline: passive scan of the running app | ✅ |
+| 7 | Triage script: one pass/fail decision | ▶ |
 | 8 | Fix a few findings | ☐ |
 | 9 | Lock down the pipeline | ☐ |
 
@@ -121,7 +121,7 @@ Goal: find misconfiguration in the Dockerfile and the GitHub workflows.
 7. ✅ CI job `checkov`: pinned image by digest, `--network none`, `--config-file`, JSON + SARIF to `reports/checkov/`. Coverage check: file existence, parsing_errors==0, both frameworks present, no log errors. Never fails on findings.
 8. ✅ Reviewed (3 fix rounds); merged PR #4 (f66bb8d). Final verification matched expected counts (dockerfile 324/3, github_actions 132/0).
 
-## Phase 6: ZAP baseline ▶
+## Phase 6: ZAP baseline ✅
 
 Plan: [phase-6-zap.md](phase-6-zap.md) — approved 2026-10-12; amendment D12 + step 3c approved 2026-10-12
 
@@ -139,23 +139,25 @@ Goal: passively scan the running app over HTTP (no attacks).
 10. ✅ Docs written (2026-10-13): `local-scanning.md` (add-on, --internal), `phases.md` phase 6 (rules.tsv read by triage), `layout.md`.
 11. ✅ Review: round 1 (2026-10-13) found no bugs; fixes applied; round 2 clean (2026-10-13) (plan step 9). Then PR and merge.
 
-## Phase 7: Triage script ☐
+## Phase 7: Triage script ▶
+
+Plan: `.claude/plans/phase-7-triage.md` (approved 2026-10-18).
 
 Goal: one Python script decides pass or fail, using `gating-policy.md` and `triage-script.md`.
 
-1. ☐ Python 3.12 `.venv`; `pytest` and `pyyaml` in `triage/requirements.txt`.
-2. ☐ The `Finding` dataclass with the fields from `triage-script.md`.
-3. ☐ Parsers, one per scanner, each tested against a **real trimmed report** from phases 2–6, stored in `triage/tests/fixtures/`. Raw secrets are removed from fixtures; fake ones are allowlisted in `.gitleaks.toml`.
-4. ☐ Explicit severity mapping per tool; unknown levels are errors, not guesses.
-5. ☐ Fingerprints and dedupe, with tests across tools (the same CVE from `trivy image` and `trivy fs` counts once).
-6. ☐ Waivers: `triage/waivers.yaml` with `reason`, `owner`, `expires`. Expired waivers stop applying; a warning when one expires within 14 days.
-7. ☐ KEV enrichment: download CISA's catalogue of actively exploited CVEs, cache it with a timestamp, refresh at most daily. Tests use a fixture copy and never touch the network. EPSS (exploit likelihood score) is optional.
-8. ☐ Reachability hints: prod versus dev dependency, build stage only versus final image, and a grep for imports labelled "grep-level evidence".
-9. ☐ Gating rules 1–6 in `policy.py`, each tested with a passing and a failing case. Each blocking finding names its rule number.
-10. ☐ Output: stdout summary plus `$GITHUB_STEP_SUMMARY`; `reports/triage.json`. Exit code 0 pass / 1 gate failed / 2 script error; never 0 on a parse error.
+1. ✅ Python 3.12 `.venv`; `pytest` and `pyyaml` in `triage/requirements.txt`.
+2. ✅ The `Finding` dataclass with the fields from `triage-script.md`.
+3. ✅ Parsers, one per scanner, each tested against a **real trimmed report** from phases 2–6, stored in `triage/tests/fixtures/`. Raw secrets are removed from fixtures (Gitleaks `Secret` is a sha256, `Match` is REDACTED). No `.gitleaks.toml` allowlist: Gitleaks finds nothing in them, and a path allowlist would stop it reading them at all (plan D18).
+4. ✅ Explicit severity mapping per tool; unknown levels are errors, not guesses.
+5. ✅ Fingerprints and dedupe, with tests across tools (the same CVE from `trivy image` and `trivy fs` counts once).
+6. ✅ Waivers: `triage/waivers.yaml` with `reason`, `owner`, `expires`. Expired waivers stop applying; a warning when one expires within 14 days.
+7. ✅ KEV enrichment: download CISA's catalogue of actively exploited CVEs, cache it with a timestamp, refresh at most daily. Tests use a fixture copy and never touch the network. EPSS (exploit likelihood score) is optional.
+8. ✅ Reachability hints: prod versus dev dependency, build stage only versus final image, and a grep for imports labelled "grep-level evidence".
+9. ✅ Gating rules 1–6 in `policy.py`, each tested with a passing and a failing case. Each blocking finding names its rule number.
+10. ✅ Output: stdout summary plus `$GITHUB_STEP_SUMMARY`; `reports/triage.json`. Exit code 0 pass / 1 gate failed / 2 script error; never 0 on a parse error.
 11. ☐ CI job `triage`: `needs:` every scan job, downloads their artifacts, the only job that can fail the build.
 12. ☐ `code-reviewer` reviews; PR; merge.
-13. ☐ Make `triage` a required status check on `main` in GitHub branch protection **(you)**.
+13. ☐ Make `triage` a required status check on `main` in GitHub branch protection **(you)**. → moved to phase 8
 
 **Expected:** the build goes red on the first run. That's the point. Read why, then go to phase 8 or add waivers with real reasons.
 
@@ -169,6 +171,7 @@ Candidates (final picks once the phases above have real data):
 3. ☐ **Code fix** (Semgrep): one real `ERROR` in `routes/` or `lib/`, which may break the matching Juice Shop challenge (note it).
 4. ☐ **Security header** (ZAP): e.g. a Content-Security-Policy or a missing header, set in the Express setup.
 5. ☐ Optional: make a failed server compile fail the build (the `|| cd .` in `postinstall`).
+6. ☐ Make `triage` a required status check on `main` (moved from phase 7 step 15) **(you)**.
 
 For each: re-run the scanner and show the finding is gone; triage should report it resolved.
 

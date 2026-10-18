@@ -1,0 +1,769 @@
+[
+  {
+    "check_type": "dockerfile",
+    "results": {
+      "passed_checks": [
+        {
+          "check_id": "CKV_DOCKER_8",
+          "bc_check_id": null,
+          "check_name": "Ensure the last USER is not root",
+          "check_result": {
+            "result": "PASSED",
+            "results_configuration": [
+              {
+                "instruction": "USER",
+                "startline": 38,
+                "endline": 38,
+                "content": "USER 65532\n",
+                "value": "65532"
+              }
+            ]
+          },
+          "code_block": [
+            [
+              39,
+              "USER 65532\n"
+            ]
+          ],
+          "file_path": "/app/Dockerfile",
+          "file_abs_path": "/src/app/Dockerfile",
+          "repo_file_path": "/src/app/Dockerfile",
+          "file_line_range": [
+            39,
+            39
+          ],
+          "resource": "/app/Dockerfile.USER",
+          "evaluations": null,
+          "check_class": "checkov.dockerfile.checks.RootUser",
+          "fixed_definition": null,
+          "entity_tags": null,
+          "caller_file_path": null,
+          "caller_file_line_range": null,
+          "resource_address": null,
+          "severity": null,
+          "bc_category": null,
+          "benchmarks": null,
+          "description": null,
+          "short_description": null,
+          "vulnerability_details": null,
+          "connected_node": null,
+          "guideline": null,
+          "details": [],
+          "check_len": null,
+          "definition_context_file_path": null
+        },
+        {
+          "check_id": "CKV_DOCKER_3",
+          "bc_check_id": null,
+          "check_name": "Ensure that a user for the container has been created",
+          "check_result": {
+            "result": "PASSED",
+            "results_configuration": [
+              {
+                "instruction": "USER",
+                "startline": 38,
+                "endline": 38,
+                "content": "USER 65532\n",
+                "value": "65532"
+              }
+            ]
+          },
+          "code_block": [
+            [
+              39,
+              "USER 65532\n"
+            ]
+          ],
+          "file_path": "/app/Dockerfile",
+          "file_abs_path": "/src/app/Dockerfile",
+          "repo_file_path": "/src/app/Dockerfile",
+          "file_line_range": [
+            39,
+            39
+          ],
+          "resource": "/app/Dockerfile.USER",
+          "evaluations": null,
+          "check_class": "checkov.dockerfile.checks.UserExists",
+          "fixed_definition": null,
+          "entity_tags": null,
+          "caller_file_path": null,
+          "caller_file_line_range": null,
+          "resource_address": null,
+          "severity": null,
+          "bc_category": null,
+          "benchmarks": null,
+          "description": null,
+          "short_description": null,
+          "vulnerability_details": null,
+          "connected_node": null,
+          "guideline": null,
+          "details": [],
+          "check_len": null,
+          "definition_context_file_path": null
+        }
+      ],
+      "failed_checks": [
+        {
+          "check_id": "CKV_DOCKER_2",
+          "bc_check_id": null,
+          "check_name": "Ensure that HEALTHCHECK instructions have been added to container images",
+          "check_result": {
+            "result": "FAILED",
+            "results_configuration": null
+          },
+          "code_block": [
+            [
+              1,
+              "FROM node:20.19.2-bookworm-slim AS base\n"
+            ],
+            [
+              2,
+              "RUN apt-get update && apt-get install -y --no-install-recommends \\\n"
+            ],
+            [
+              3,
+              "    dumb-init=1.2.5-* \\\n"
+            ],
+            [
+              4,
+              "    && rm -rf /var/lib/apt/lists/*\n"
+            ],
+            [
+              5,
+              "\n"
+            ],
+            [
+              6,
+              "FROM node:20.19.2-bookworm AS builder\n"
+            ],
+            [
+              7,
+              "\n"
+            ],
+            [
+              8,
+              "WORKDIR /juice-shop\n"
+            ],
+            [
+              9,
+              "COPY package*.json ./\n"
+            ],
+            [
+              10,
+              "RUN npm ci --ignore-scripts\n"
+            ],
+            [
+              11,
+              "COPY . .\n"
+            ],
+            [
+              12,
+              "RUN npm run build && npm prune --production\n"
+            ],
+            [
+              13,
+              "\n"
+            ],
+            [
+              14,
+              "FROM base AS production\n"
+            ],
+            [
+              15,
+              "\n"
+            ],
+            [
+              16,
+              "ENV NODE_ENV=production\n"
+            ],
+            [
+              17,
+              "WORKDIR /juice-shop\n"
+            ],
+            [
+              18,
+              "\n"
+            ],
+            [
+              19,
+              "COPY --from=builder --chown=node:node /juice-shop .\n"
+            ],
+            [
+              20,
+              "\n"
+            ],
+            [
+              21,
+              "USER node\n"
+            ],
+            [
+              22,
+              "EXPOSE 3000\n"
+            ],
+            [
+              23,
+              "ENTRYPOINT [\"dumb-init\", \"--\"]\n"
+            ],
+            [
+              24,
+              "CMD [\"node\", \"build/app.js\"]"
+            ]
+          ],
+          "file_path": "/app/infrastructure/Dockerfile",
+          "file_abs_path": "/src/app/infrastructure/Dockerfile",
+          "repo_file_path": "/src/app/infrastructure/Dockerfile",
+          "file_line_range": [
+            1,
+            24
+          ],
+          "resource": "/app/infrastructure/Dockerfile.",
+          "evaluations": null,
+          "check_class": "checkov.dockerfile.checks.HealthcheckExists",
+          "fixed_definition": null,
+          "entity_tags": null,
+          "caller_file_path": null,
+          "caller_file_line_range": null,
+          "resource_address": null,
+          "severity": null,
+          "bc_category": null,
+          "benchmarks": null,
+          "description": null,
+          "short_description": null,
+          "vulnerability_details": null,
+          "connected_node": null,
+          "guideline": null,
+          "details": [],
+          "check_len": null,
+          "definition_context_file_path": null
+        },
+        {
+          "check_id": "CKV_DOCKER_7",
+          "bc_check_id": null,
+          "check_name": "Ensure the base image uses a non latest version tag",
+          "check_result": {
+            "result": "FAILED",
+            "results_configuration": [
+              {
+                "instruction": "FROM",
+                "startline": 21,
+                "endline": 21,
+                "content": "FROM gcr.io/distroless/nodejs24-debian13\n",
+                "value": "gcr.io/distroless/nodejs24-debian13"
+              }
+            ]
+          },
+          "code_block": [
+            [
+              22,
+              "FROM gcr.io/distroless/nodejs24-debian13\n"
+            ]
+          ],
+          "file_path": "/app/Dockerfile",
+          "file_abs_path": "/src/app/Dockerfile",
+          "repo_file_path": "/src/app/Dockerfile",
+          "file_line_range": [
+            22,
+            22
+          ],
+          "resource": "/app/Dockerfile.FROM",
+          "evaluations": null,
+          "check_class": "checkov.dockerfile.checks.ReferenceLatestTag",
+          "fixed_definition": null,
+          "entity_tags": null,
+          "caller_file_path": null,
+          "caller_file_line_range": null,
+          "resource_address": null,
+          "severity": null,
+          "bc_category": null,
+          "benchmarks": null,
+          "description": null,
+          "short_description": null,
+          "vulnerability_details": null,
+          "connected_node": null,
+          "guideline": null,
+          "details": [],
+          "check_len": null,
+          "definition_context_file_path": null
+        },
+        {
+          "check_id": "CKV_DOCKER_2",
+          "bc_check_id": null,
+          "check_name": "Ensure that HEALTHCHECK instructions have been added to container images",
+          "check_result": {
+            "result": "FAILED",
+            "results_configuration": null
+          },
+          "code_block": [
+            [
+              1,
+              "FROM node:24 AS installer\n"
+            ],
+            [
+              2,
+              "COPY . /juice-shop\n"
+            ],
+            [
+              3,
+              "WORKDIR /juice-shop\n"
+            ],
+            [
+              4,
+              "RUN npm install -g typescript@^6.0.3\n"
+            ],
+            [
+              5,
+              "RUN npm install --omit=dev\n"
+            ],
+            [
+              6,
+              "RUN npm dedupe --omit=dev\n"
+            ],
+            [
+              7,
+              "RUN rm -rf frontend/node_modules\n"
+            ],
+            [
+              8,
+              "RUN rm -rf frontend/.angular\n"
+            ],
+            [
+              9,
+              "RUN rm -rf frontend/src/assets\n"
+            ],
+            [
+              10,
+              "RUN mkdir logs\n"
+            ],
+            [
+              11,
+              "RUN chown -R 65532 logs\n"
+            ],
+            [
+              12,
+              "RUN chgrp -R 0 ftp/ frontend/dist/ logs/ data/ i18n/\n"
+            ],
+            [
+              13,
+              "RUN chmod -R g=u ftp/ frontend/dist/ logs/ data/ i18n/\n"
+            ],
+            [
+              14,
+              "RUN rm ftp/legal.md || true\n"
+            ],
+            [
+              15,
+              "RUN rm i18n/*.json || true\n"
+            ],
+            [
+              16,
+              "\n"
+            ],
+            [
+              17,
+              "# keep version in sync with package.json\n"
+            ],
+            [
+              18,
+              "ARG CYCLONEDX_NPM_VERSION='^2.0.0||^3.0.0||^4.0.0'\n"
+            ],
+            [
+              19,
+              "RUN npm install -g @cyclonedx/cyclonedx-npm@$CYCLONEDX_NPM_VERSION\n"
+            ],
+            [
+              20,
+              "RUN npm run sbom\n"
+            ],
+            [
+              21,
+              "\n"
+            ],
+            [
+              22,
+              "FROM gcr.io/distroless/nodejs24-debian13\n"
+            ],
+            [
+              23,
+              "ARG BUILD_DATE\n"
+            ],
+            [
+              24,
+              "ARG VCS_REF\n"
+            ],
+            [
+              25,
+              "LABEL maintainer=\"Bjoern Kimminich <bjoern.kimminich@owasp.org>\" \\\n"
+            ],
+            [
+              26,
+              "    org.opencontainers.image.title=\"OWASP Juice Shop\" \\\n"
+            ],
+            [
+              27,
+              "    org.opencontainers.image.description=\"Probably the most modern and sophisticated insecure web application\" \\\n"
+            ],
+            [
+              28,
+              "    org.opencontainers.image.authors=\"Bjoern Kimminich <bjoern.kimminich@owasp.org>\" \\\n"
+            ],
+            [
+              29,
+              "    org.opencontainers.image.vendor=\"Open Worldwide Application Security Project\" \\\n"
+            ],
+            [
+              30,
+              "    org.opencontainers.image.documentation=\"https://help.owasp-juice.shop\" \\\n"
+            ],
+            [
+              31,
+              "    org.opencontainers.image.licenses=\"MIT\" \\\n"
+            ],
+            [
+              32,
+              "    org.opencontainers.image.version=\"20.2.0\" \\\n"
+            ],
+            [
+              33,
+              "    org.opencontainers.image.url=\"https://owasp-juice.shop\" \\\n"
+            ],
+            [
+              34,
+              "    org.opencontainers.image.source=\"https://github.com/juice-shop/juice-shop\" \\\n"
+            ],
+            [
+              35,
+              "    org.opencontainers.image.revision=$VCS_REF \\\n"
+            ],
+            [
+              36,
+              "    org.opencontainers.image.created=$BUILD_DATE\n"
+            ],
+            [
+              37,
+              "WORKDIR /juice-shop\n"
+            ],
+            [
+              38,
+              "COPY --from=installer --chown=65532:0 /juice-shop .\n"
+            ],
+            [
+              39,
+              "USER 65532\n"
+            ],
+            [
+              40,
+              "EXPOSE 3000\n"
+            ],
+            [
+              41,
+              "CMD [\"/juice-shop/build/app.js\"]"
+            ]
+          ],
+          "file_path": "/app/Dockerfile",
+          "file_abs_path": "/src/app/Dockerfile",
+          "repo_file_path": "/src/app/Dockerfile",
+          "file_line_range": [
+            1,
+            41
+          ],
+          "resource": "/app/Dockerfile.",
+          "evaluations": null,
+          "check_class": "checkov.dockerfile.checks.HealthcheckExists",
+          "fixed_definition": null,
+          "entity_tags": null,
+          "caller_file_path": null,
+          "caller_file_line_range": null,
+          "resource_address": null,
+          "severity": null,
+          "bc_category": null,
+          "benchmarks": null,
+          "description": null,
+          "short_description": null,
+          "vulnerability_details": null,
+          "connected_node": null,
+          "guideline": null,
+          "details": [],
+          "check_len": null,
+          "definition_context_file_path": null
+        }
+      ],
+      "skipped_checks": [],
+      "parsing_errors": []
+    },
+    "summary": {
+      "passed": 324,
+      "failed": 3,
+      "skipped": 0,
+      "parsing_errors": 0,
+      "resource_count": 2,
+      "checkov_version": "3.3.22"
+    },
+    "url": "Add an api key '--bc-api-key <api-key>' to see more detailed insights via https://bridgecrew.cloud"
+  },
+  {
+    "check_type": "github_actions",
+    "results": {
+      "passed_checks": [
+        {
+          "check_id": "CKV_GHA_1",
+          "bc_check_id": null,
+          "check_name": "Ensure ACTIONS_ALLOW_UNSECURE_COMMANDS isn't true on environment variables",
+          "check_result": {
+            "result": "PASSED",
+            "results_configuration": {
+              "runs-on": "ubuntu-24.04",
+              "timeout-minutes": 30,
+              "permissions": {
+                "contents": "read",
+                "__startline__": 26,
+                "__endline__": 27
+              },
+              "steps": [
+                {
+                  "uses": "actions/checkout@v7",
+                  "__startline__": 28,
+                  "__endline__": 30
+                },
+                {
+                  "name": "Build image",
+                  "run": "docker build -t juice-shop:ci ./app",
+                  "__startline__": 30,
+                  "__endline__": 35
+                },
+                {
+                  "name": "Save image",
+                  "run": "docker save juice-shop:ci -o \"$RUNNER_TEMP/juice-shop.tar\"",
+                  "__startline__": 35,
+                  "__endline__": 38
+                },
+                {
+                  "uses": "actions/upload-artifact@v7",
+                  "with": {
+                    "name": "juice-shop-image",
+                    "path": "${{ runner.temp }}/juice-shop.tar",
+                    "if-no-files-found": "error",
+                    "retention-days": 1,
+                    "compression-level": 0,
+                    "__startline__": 40,
+                    "__endline__": 46
+                  },
+                  "__startline__": 38,
+                  "__endline__": 46
+                }
+              ],
+              "__startline__": 23,
+              "__endline__": 46
+            }
+          },
+          "code_block": [
+            [
+              23,
+              "    runs-on: ubuntu-24.04\n"
+            ],
+            [
+              24,
+              "    timeout-minutes: 30\n"
+            ],
+            [
+              25,
+              "    permissions:\n"
+            ],
+            [
+              26,
+              "      contents: read\n"
+            ],
+            [
+              27,
+              "    steps:\n"
+            ],
+            [
+              28,
+              "      - uses: actions/checkout@v7\n"
+            ],
+            [
+              29,
+              "\n"
+            ],
+            [
+              30,
+              "      - name: Build image\n"
+            ],
+            [
+              31,
+              "        run: docker build -t juice-shop:ci ./app\n"
+            ],
+            [
+              32,
+              "\n"
+            ],
+            [
+              33,
+              "      # Scan jobs that need the image (trivy, zap) get it as a tar instead of rebuilding.\n"
+            ],
+            [
+              34,
+              "      # upload-artifact zips it (~115 MB). Kept for 1 day: it's only needed within this run.\n"
+            ],
+            [
+              35,
+              "      - name: Save image\n"
+            ],
+            [
+              36,
+              "        run: docker save juice-shop:ci -o \"$RUNNER_TEMP/juice-shop.tar\"\n"
+            ],
+            [
+              37,
+              "\n"
+            ],
+            [
+              38,
+              "      - uses: actions/upload-artifact@v7\n"
+            ],
+            [
+              39,
+              "        with:\n"
+            ],
+            [
+              40,
+              "          name: juice-shop-image\n"
+            ],
+            [
+              41,
+              "          path: ${{ runner.temp }}/juice-shop.tar\n"
+            ],
+            [
+              42,
+              "          if-no-files-found: error\n"
+            ],
+            [
+              43,
+              "          retention-days: 1\n"
+            ],
+            [
+              44,
+              "          compression-level: 0 # image layers are already compressed\n"
+            ],
+            [
+              45,
+              "\n"
+            ],
+            [
+              46,
+              "  gitleaks:\n"
+            ],
+            [
+              47,
+              "    runs-on: ubuntu-24.04\n"
+            ]
+          ],
+          "file_path": "/.github/workflows/security.yml",
+          "file_abs_path": "/src/.github/workflows/security.yml",
+          "repo_file_path": "/src/.github/workflows/security.yml",
+          "file_line_range": [
+            23,
+            47
+          ],
+          "resource": "jobs(build)",
+          "evaluations": null,
+          "check_class": "checkov.github_actions.checks.job.AllowUnsecureCommandsOnJob",
+          "fixed_definition": null,
+          "entity_tags": null,
+          "caller_file_path": null,
+          "caller_file_line_range": null,
+          "resource_address": null,
+          "severity": null,
+          "bc_category": null,
+          "benchmarks": null,
+          "description": null,
+          "short_description": null,
+          "vulnerability_details": null,
+          "connected_node": null,
+          "guideline": null,
+          "details": [],
+          "check_len": null,
+          "definition_context_file_path": null,
+          "triggers": [
+            [
+              "push",
+              "pull_request"
+            ]
+          ],
+          "job": [
+            "build"
+          ],
+          "workflow_name": "security"
+        },
+        {
+          "check_id": "CKV2_GHA_1",
+          "bc_check_id": null,
+          "check_name": "Ensure top-level permissions are not set to write-all",
+          "check_result": {
+            "result": "PASSED",
+            "evaluated_keys": [
+              "permissions"
+            ]
+          },
+          "code_block": [
+            [
+              19,
+              "permissions: {}\n"
+            ],
+            [
+              20,
+              "\n"
+            ]
+          ],
+          "file_path": "/.github/workflows/security.yml",
+          "file_abs_path": "/src/.github/workflows/security.yml",
+          "repo_file_path": "/src/.github/workflows/security.yml",
+          "file_line_range": [
+            19,
+            20
+          ],
+          "resource": "on(security)",
+          "evaluations": null,
+          "check_class": "checkov.common.graph.checks_infra.base_check",
+          "fixed_definition": null,
+          "entity_tags": null,
+          "caller_file_path": null,
+          "caller_file_line_range": null,
+          "resource_address": null,
+          "severity": null,
+          "bc_category": null,
+          "benchmarks": null,
+          "description": null,
+          "short_description": null,
+          "vulnerability_details": null,
+          "connected_node": null,
+          "guideline": null,
+          "details": [],
+          "check_len": null,
+          "definition_context_file_path": null,
+          "triggers": [
+            [
+              "push",
+              "pull_request"
+            ]
+          ],
+          "job": [
+            ""
+          ],
+          "workflow_name": "security"
+        }
+      ],
+      "failed_checks": [],
+      "skipped_checks": [],
+      "parsing_errors": []
+    },
+    "summary": {
+      "passed": 192,
+      "failed": 0,
+      "skipped": 0,
+      "parsing_errors": 0,
+      "resource_count": 0,
+      "checkov_version": "3.3.22"
+    },
+    "url": "Add an api key '--bc-api-key <api-key>' to see more detailed insights via https://bridgecrew.cloud"
+  }
+]

@@ -14,7 +14,7 @@ Use Python 3.12+ and the standard library where possible. Allowed extra dependen
   - vuln: `cve + package + installed_version` (the same CVE from `trivy image` and `trivy fs` counts once)
   - secret: `rule + file + sha256(secret)`. Never store or print the raw secret. The CI `gitleaks` job already replaces `Secret` with `sha256:<hex>` and `Match` with `REDACTED` in `reports/gitleaks.json`; use that hash as-is.
   - code/iac: `cwe or rule + file + line` (allow a small line tolerance if tools disagree)
-  - dast: `alert_id + url_path + param`
+  - dast: `alert_id + site` (one finding per alert per site; the instances are kept for the report, not in the key). Reason (D20): ZAP caps instances at 5 per alert and which 5 appear changes between runs, so a per-instance key would stop waivers matching.
 - **Enrich:** CISA KEV catalog (JSON feed, cached to a file with a timestamp, and refreshed at most daily) and EPSS if useful. Tests must never hit the network. They use a fixture copy of the feed.
 - **Reachability hints** (keep them simple and honest): whether a package is a production or dev dependency, whether it appears only in the build stage and not the final image, and whether first-party code imports or calls the vulnerable module (grep-level evidence is acceptable if it is labelled as such).
 

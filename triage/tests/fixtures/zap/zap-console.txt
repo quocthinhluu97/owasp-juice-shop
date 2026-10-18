@@ -1,0 +1,30 @@
+Using the Automation Framework
+Total of 165 URLs
+IGNORE: Storable and Cacheable Content [10049] x 7 Informational cacheability notes (-1/-2/-3); no security impact for this app.
+	http://juice:3000/ftp (200 OK)
+	http://juice:3000/robots.txt (200 OK)
+	http://juice:3000 (200 OK)
+	http://juice:3000/assets/public/favicon_js.ico (200 OK)
+	http://juice:3000/polyfills.js (200 OK)
+IGNORE: Session ID in URL Rewrite [3] x 5 Noise: the sid is socket.io's Engine.IO connection id, not an auth session.
+	http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukZe&sid=eIRKvYWkUh5599OsAAAA (200 OK)
+	http://juice:3000/socket.io/?EIO=4&transport=websocket&sid=eIRKvYWkUh5599OsAAAA (101 Switching Protocols)
+	http://juice:3000/socket.io/?EIO=4&transport=websocket&sid=re52FiSE85HQqvo9AAAC (101 Switching Protocols)
+	http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukZb&sid=eIRKvYWkUh5599OsAAAA (200 OK)
+	http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukiH&sid=eIRKvYWkUh5599OsAAAA (200 OK)
+WARN-NEW: Missing Anti-clickjacking Header [10020] x 2 Fires only on socket.io polling responses (helmet frameguard covers HTML); not framed, so not gating.
+	http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukZb&sid=eIRKvYWkUh5599OsAAAA (200 OK)
+	http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukiH&sid=eIRKvYWkUh5599OsAAAA (200 OK)
+WARN-NEW: Dangerous JS Functions [10110] x 3 Real: bypassSecurityTrustHtml (DOM-XSS challenge); low confidence, code gating is Semgrep's job (rule 4).
+	http://juice:3000/about.component-CZcG2819.js (200 OK)
+	http://juice:3000/chunk-eYAgyLdn.js (200 OK)
+	http://juice:3000/main.js (200 OK)
+FAIL-NEW: Off-site Redirect [10028] x 1 Gating rule 6: open redirect on our own origin is a phishing/token-theft tool; fix is an exact-match allowlist.
+	http://juice:3000/redirect?to=https://github.com/juice-shop/juice-shop (302 Found)
+FAIL-NEW: Content Security Policy (CSP) Header Not Set [10038] x 5 Gating rule 6: no CSP lets any XSS run arbitrary script; high confidence; fix is one header (phase 8 candidate).
+	http://juice:3000 (200 OK)
+	http://juice:3000/ (200 OK)
+	http://juice:3000/ftp (200 OK)
+	http://juice:3000/ftp/coupons_2013.md.bak (403 Forbidden)
+	http://juice:3000/sitemap.xml (200 OK)
+FAIL-NEW: 2	FAIL-INPROG: 0	WARN-NEW: 7	WARN-INPROG: 0	INFO: 0	IGNORE: 4	PASS: 54

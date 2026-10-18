@@ -1,0 +1,487 @@
+{
+  "@programName": "ZAP",
+  "@version": "2.17.0",
+  "@generated": "Tue, 13 Oct 2026 15:31:22",
+  "created": "2026-10-13T15:31:22.195780109Z",
+  "insights": [
+    {
+      "level": "Low",
+      "reason": "Warning",
+      "site": "",
+      "key": "insight.log.warn",
+      "description": "ZAP warnings logged - see the zap.log file for details",
+      "statistic": "6"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "",
+      "key": "insight.network.failure",
+      "description": "Percentage of network failures",
+      "statistic": "9"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.code.1xx",
+      "description": "Percentage of responses with status code 1xx",
+      "statistic": "1"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.code.2xx",
+      "description": "Percentage of responses with status code 2xx",
+      "statistic": "63"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.code.3xx",
+      "description": "Percentage of responses with status code 3xx",
+      "statistic": "32"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.code.4xx",
+      "description": "Percentage of responses with status code 4xx",
+      "statistic": "3"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.application/javascript",
+      "description": "Percentage of endpoints with content type application/javascript",
+      "statistic": "7"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.application/json",
+      "description": "Percentage of endpoints with content type application/json",
+      "statistic": "10"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.application/octet-stream",
+      "description": "Percentage of endpoints with content type application/octet-stream",
+      "statistic": "4"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.font/woff2",
+      "description": "Percentage of endpoints with content type font/woff2",
+      "statistic": "1"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.image/jpeg",
+      "description": "Percentage of endpoints with content type image/jpeg",
+      "statistic": "16"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.image/png",
+      "description": "Percentage of endpoints with content type image/png",
+      "statistic": "8"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.image/x-icon",
+      "description": "Percentage of endpoints with content type image/x-icon",
+      "statistic": "1"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.text/css",
+      "description": "Percentage of endpoints with content type text/css",
+      "statistic": "1"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.text/html",
+      "description": "Percentage of endpoints with content type text/html",
+      "statistic": "45"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.text/markdown",
+      "description": "Percentage of endpoints with content type text/markdown",
+      "statistic": "2"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.ctype.text/plain",
+      "description": "Percentage of endpoints with content type text/plain",
+      "statistic": "2"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.method.GET",
+      "description": "Percentage of endpoints with method GET",
+      "statistic": "97"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.method.POST",
+      "description": "Percentage of endpoints with method POST",
+      "statistic": "2"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.endpoint.total",
+      "description": "Count of total endpoints",
+      "statistic": "125"
+    },
+    {
+      "level": "Info",
+      "reason": "Informational",
+      "site": "http://juice:3000",
+      "key": "insight.response.slow",
+      "description": "Percentage of slow responses",
+      "statistic": "12"
+    }
+  ],
+  "site": [
+    {
+      "@name": "http://juice:3000",
+      "@host": "juice",
+      "@port": "3000",
+      "@ssl": "false",
+      "alerts": [
+        {
+          "pluginid": "10028",
+          "alertRef": "10028",
+          "alert": "Off-site Redirect",
+          "name": "Off-site Redirect",
+          "riskcode": "3",
+          "confidence": "2",
+          "riskdesc": "High (Medium)",
+          "desc": "<p>Open redirects are one of the OWASP 2010 Top Ten vulnerabilities. This check looks at user-supplied input in query string parameters and POST data to identify where open redirects might be possible. Open redirects occur when an application allows user-supplied input (e.g. https://nottrusted.com) to control an off-site destination. This is generally a pretty accurate way to find where 301 or 302 redirects could be exploited by spammers or phishing attacks.</p><p></p><p>For example an attacker could supply a user with the following link: https://example.com/example.php?url=https://malicious.example.com.</p><p></p><p>NOTE: For the purposes of the passive check the authority portion of the origin and destination were compared. Manual testing may be required to validate the impact of this finding.</p>",
+          "instances": [
+            {
+              "id": "122",
+              "uri": "http://juice:3000/redirect?to=https://github.com/juice-shop/juice-shop",
+              "nodeName": "http://juice:3000/redirect (to)",
+              "method": "GET",
+              "param": "to",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": "The 301 or 302 response to a request for the following URL appeared to contain user input in the location header:\n\nhttp://juice:3000/redirect?to=https://github.com/juice-shop/juice-shop\n\nThe user input found was:\n\nto=https://github.com/juice-shop/juice-shop\n\nThe context was:\n\nhttps://github.com/juice-shop/juice-shop"
+            }
+          ],
+          "count": "1",
+          "systemic": false,
+          "solution": "<p>To avoid the open redirect vulnerability, parameters of the application script/program must be validated before sending 302 HTTP code (redirect) to the client browser. Implement safe redirect functionality that only redirects to relative URI's, or a list of trusted domains.</p>",
+          "otherinfo": "<p>The 301 or 302 response to a request for the following URL appeared to contain user input in the location header:</p><p></p><p>http://juice:3000/redirect?to=https://github.com/juice-shop/juice-shop</p><p></p><p>The user input found was:</p><p></p><p>to=https://github.com/juice-shop/juice-shop</p><p></p><p>The context was:</p><p></p><p>https://github.com/juice-shop/juice-shop</p>",
+          "reference": "<p>https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html</p><p>https://cwe.mitre.org/data/definitions/601.html</p>",
+          "cweid": "601",
+          "wascid": "38",
+          "sourceid": "251"
+        },
+        {
+          "pluginid": "10038",
+          "alertRef": "10038-1",
+          "alert": "Content Security Policy (CSP) Header Not Set",
+          "name": "Content Security Policy (CSP) Header Not Set",
+          "riskcode": "2",
+          "confidence": "3",
+          "riskdesc": "Medium (High)",
+          "desc": "<p>Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.</p>",
+          "instances": [
+            {
+              "id": "2",
+              "uri": "http://juice:3000",
+              "nodeName": "http://juice:3000",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            },
+            {
+              "id": "73",
+              "uri": "http://juice:3000/",
+              "nodeName": "http://juice:3000/",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            },
+            {
+              "id": "67",
+              "uri": "http://juice:3000/ftp",
+              "nodeName": "http://juice:3000/ftp",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            },
+            {
+              "id": "83",
+              "uri": "http://juice:3000/ftp/coupons_2013.md.bak",
+              "nodeName": "http://juice:3000/ftp/coupons_2013.md.bak",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            },
+            {
+              "id": "4",
+              "uri": "http://juice:3000/sitemap.xml",
+              "nodeName": "http://juice:3000/sitemap.xml",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            }
+          ],
+          "count": "5",
+          "systemic": true,
+          "solution": "<p>Ensure that your web server, application server, load balancer, etc. is configured to set the Content-Security-Policy header.</p>",
+          "otherinfo": "",
+          "reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP</p><p>https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html</p><p>https://www.w3.org/TR/CSP/</p><p>https://w3c.github.io/webappsec-csp/</p><p>https://web.dev/articles/csp</p><p>https://caniuse.com/#feat=contentsecuritypolicy</p><p>https://content-security-policy.com/</p>",
+          "cweid": "693",
+          "wascid": "15",
+          "sourceid": "1"
+        },
+        {
+          "pluginid": "10020",
+          "alertRef": "10020-1",
+          "alert": "Missing Anti-clickjacking Header",
+          "name": "Missing Anti-clickjacking Header",
+          "riskcode": "2",
+          "confidence": "2",
+          "riskdesc": "Medium (Medium)",
+          "desc": "<p>The response does not protect against 'ClickJacking' attacks. It should include either Content-Security-Policy with 'frame-ancestors' directive or X-Frame-Options.</p>",
+          "instances": [
+            {
+              "id": "109",
+              "uri": "http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukZb&sid=eIRKvYWkUh5599OsAAAA",
+              "nodeName": "http://juice:3000/socket.io/ (EIO,sid,t,transport)(40)",
+              "method": "POST",
+              "param": "x-frame-options",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            },
+            {
+              "id": "115",
+              "uri": "http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukiH&sid=eIRKvYWkUh5599OsAAAA",
+              "nodeName": "http://juice:3000/socket.io/ (EIO,sid,t,transport)(42[\"notification received\",\"8d2072c6b0a4...)",
+              "method": "POST",
+              "param": "x-frame-options",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": ""
+            }
+          ],
+          "count": "2",
+          "systemic": false,
+          "solution": "<p>Modern Web browsers support the Content-Security-Policy and X-Frame-Options HTTP headers. Ensure one of them is set on all web pages returned by your site/app.</p><p>If you expect the page to be framed only by pages on your server (e.g. it's part of a FRAMESET) then you'll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. Alternatively consider implementing Content Security Policy's \"frame-ancestors\" directive.</p>",
+          "otherinfo": "",
+          "reference": "<p>https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Frame-Options</p>",
+          "cweid": "1021",
+          "wascid": "15",
+          "sourceid": "182"
+        },
+        {
+          "pluginid": "3",
+          "alertRef": "3-1",
+          "alert": "Session ID in URL Rewrite",
+          "name": "Session ID in URL Rewrite",
+          "riskcode": "2",
+          "confidence": "3",
+          "riskdesc": "Medium (High)",
+          "desc": "<p>URL rewrite is used to track user session ID. The session ID may be disclosed via cross-site referer header. In addition, the session ID might be stored in browser history or server logs.</p>",
+          "instances": [
+            {
+              "id": "112",
+              "uri": "http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukZe&sid=eIRKvYWkUh5599OsAAAA",
+              "nodeName": "http://juice:3000/socket.io/ (EIO,sid,t,transport)",
+              "method": "GET",
+              "param": "sid",
+              "attack": "",
+              "evidence": "eIRKvYWkUh5599OsAAAA",
+              "otherinfo": ""
+            },
+            {
+              "id": "114",
+              "uri": "http://juice:3000/socket.io/?EIO=4&transport=websocket&sid=eIRKvYWkUh5599OsAAAA",
+              "nodeName": "http://juice:3000/socket.io/ (EIO,sid,transport)",
+              "method": "GET",
+              "param": "sid",
+              "attack": "",
+              "evidence": "eIRKvYWkUh5599OsAAAA",
+              "otherinfo": ""
+            },
+            {
+              "id": "124",
+              "uri": "http://juice:3000/socket.io/?EIO=4&transport=websocket&sid=re52FiSE85HQqvo9AAAC",
+              "nodeName": "http://juice:3000/socket.io/ (EIO,sid,transport)",
+              "method": "GET",
+              "param": "sid",
+              "attack": "",
+              "evidence": "re52FiSE85HQqvo9AAAC",
+              "otherinfo": ""
+            },
+            {
+              "id": "110",
+              "uri": "http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukZb&sid=eIRKvYWkUh5599OsAAAA",
+              "nodeName": "http://juice:3000/socket.io/ (EIO,sid,t,transport)(40)",
+              "method": "POST",
+              "param": "sid",
+              "attack": "",
+              "evidence": "eIRKvYWkUh5599OsAAAA",
+              "otherinfo": ""
+            },
+            {
+              "id": "116",
+              "uri": "http://juice:3000/socket.io/?EIO=4&transport=polling&t=Q4rukiH&sid=eIRKvYWkUh5599OsAAAA",
+              "nodeName": "http://juice:3000/socket.io/ (EIO,sid,t,transport)(42[\"notification received\",\"8d2072c6b0a4...)",
+              "method": "POST",
+              "param": "sid",
+              "attack": "",
+              "evidence": "eIRKvYWkUh5599OsAAAA",
+              "otherinfo": ""
+            }
+          ],
+          "count": "5",
+          "systemic": true,
+          "solution": "<p>For secure content, put session ID in a cookie. To be even more secure consider using a combination of cookie and URL rewrite.</p>",
+          "otherinfo": "",
+          "reference": "<p>https://seclists.org/webappsec/2002/q4/111</p>",
+          "cweid": "598",
+          "wascid": "13",
+          "sourceid": "183"
+        },
+        {
+          "pluginid": "10110",
+          "alertRef": "10110",
+          "alert": "Dangerous JS Functions",
+          "name": "Dangerous JS Functions",
+          "riskcode": "1",
+          "confidence": "1",
+          "riskdesc": "Low (Low)",
+          "desc": "<p>A dangerous JS function seems to be in use that would leave the site vulnerable.</p>",
+          "instances": [
+            {
+              "id": "120",
+              "uri": "http://juice:3000/about.component-CZcG2819.js",
+              "nodeName": "http://juice:3000/about.component-CZcG2819.js",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "bypassSecurityTrustHtml(",
+              "otherinfo": ""
+            },
+            {
+              "id": "106",
+              "uri": "http://juice:3000/chunk-eYAgyLdn.js",
+              "nodeName": "http://juice:3000/chunk-eYAgyLdn.js",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "bypassSecurityTrustHtml(",
+              "otherinfo": ""
+            },
+            {
+              "id": "105",
+              "uri": "http://juice:3000/main.js",
+              "nodeName": "http://juice:3000/main.js",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "bypassSecurityTrustHtml(",
+              "otherinfo": ""
+            }
+          ],
+          "count": "3",
+          "systemic": false,
+          "solution": "<p>See the references for security advice on the use of these functions.</p>",
+          "otherinfo": "",
+          "reference": "<p>https://v17.angular.io/guide/security</p>",
+          "cweid": "749",
+          "wascid": "-1",
+          "sourceid": "222"
+        },
+        {
+          "pluginid": "10049",
+          "alertRef": "10049-3",
+          "alert": "Storable and Cacheable Content",
+          "name": "Storable and Cacheable Content",
+          "riskcode": "0",
+          "confidence": "2",
+          "riskdesc": "Informational (Medium)",
+          "desc": "<p>The response contents are storable by caching components such as proxy servers, and may be retrieved directly from the cache, rather than from the origin server by the caching servers, in response to similar requests from other users. If the response data is sensitive, personal or user-specific, this may result in sensitive information being leaked. In some cases, this may even result in a user gaining complete control of the session of another user, depending on the configuration of the caching components in use in their environment. This is primarily an issue where \"shared\" caching servers such as \"proxy\" caches are configured on the local network. This configuration is typically found in corporate or educational environments, for instance.</p>",
+          "instances": [
+            {
+              "id": "69",
+              "uri": "http://juice:3000/ftp",
+              "nodeName": "http://juice:3000/ftp",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": "In the absence of an explicitly specified caching lifetime directive in the response, a liberal lifetime heuristic of 1 year was assumed. This is permitted by rfc7234."
+            },
+            {
+              "id": "1",
+              "uri": "http://juice:3000/robots.txt",
+              "nodeName": "http://juice:3000/robots.txt",
+              "method": "GET",
+              "param": "",
+              "attack": "",
+              "evidence": "",
+              "otherinfo": "In the absence of an explicitly specified caching lifetime directive in the response, a liberal lifetime heuristic of 1 year was assumed. This is permitted by rfc7234."
+            }
+          ],
+          "count": "2",
+          "systemic": false,
+          "solution": "<p>Validate that the response does not contain sensitive, personal or user-specific information. If it does, consider the use of the following HTTP response headers, to limit, or prevent the content being stored and retrieved from the cache by another user:</p><p>Cache-Control: no-cache, no-store, must-revalidate, private</p><p>Pragma: no-cache</p><p>Expires: 0</p><p>This configuration directs both HTTP 1.0 and HTTP 1.1 compliant caching servers to not store the response, and to not retrieve the response (without validation) from the cache, in response to a similar request.</p>",
+          "otherinfo": "<p>In the absence of an explicitly specified caching lifetime directive in the response, a liberal lifetime heuristic of 1 year was assumed. This is permitted by rfc7234.</p>",
+          "reference": "<p>https://datatracker.ietf.org/doc/html/rfc7234</p><p>https://datatracker.ietf.org/doc/html/rfc7231</p><p>https://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html</p>",
+          "cweid": "524",
+          "wascid": "13",
+          "sourceid": "22"
+        }
+      ]
+    }
+  ],
+  "sequences": []
+}

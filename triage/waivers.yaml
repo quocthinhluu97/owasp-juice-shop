@@ -1,0 +1,293 @@
+# Waivers for the triage gate (gating-policy.md "Waivers", D12). One entry per judged finding.
+# Format (see the end of this header): fingerprint (copied from reports/triage.json), reason, owner, expires.
+# expires is the last day it applies, at most 90 days after the run date; expired waivers stop applying.
+# Two expiries: 2027-01-16 (deliberate challenge material, or not reachable / fix needs a major upgrade:
+# re-judge then) and 2026-11-30 (cheap fixes deferred to phase 8: they should be fixed, not renewed).
+# Drafted 2026-10-18 from triage run on CI run 38422003321; reviewed by the owner before commit.
+#
+# Selector: fingerprint, or cve: CVE-YYYY-NNNN + package. Fields: reason, owner (GitHub handle), expires (YYYY-MM-DD).
+waivers:
+
+  # --- rule 1 ---
+  - fingerprint: "secret:key-files:app/ctf.key:sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"   # key-files app/ctf.key:0
+    reason: "Juice Shop CTF flag-code key, shipped upstream as challenge material (docs/findings/gitleaks.md); not a credential for anything we run. The fingerprint hashes an empty string (the key-files rule matches the file name, not the content), so this waiver covers the file whatever it contains; re-check it if the file changes."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "secret:generic-api-key:app/data/static/users.yml:sha256:89c6bbcf5d6ca1632bb983629f08159628c871a824b38b998a5e6725fe9b82f0"   # generic-api-key app/data/static/users.yml:151
+    reason: "Seeded TOTP secret of the fake user wurstbrot for the upstream 2FA challenge (also Semgrep's detected-generic-secret); public, not a real account."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "secret:generic-api-key:app/data/static/users.yml:sha256:07afada2d81267b59eea355307a3ee3f1be5132ce91123e64869cf4ffaf93615"   # generic-api-key app/data/static/users.yml:88
+    reason: "Seeded password of the fake user bjoern.kimminich, the answer to an upstream login challenge; public in the Juice Shop repo, not a real account."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "secret:key-files:app/encryptionkeys/premium.key:sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"   # key-files app/encryptionkeys/premium.key:0
+    reason: "Juice Shop premium-content key, shipped upstream as challenge material (docs/findings/gitleaks.md); not a credential for anything we run. The fingerprint hashes an empty string (the key-files rule matches the file name, not the content), so this waiver covers the file whatever it contains; re-check it if the file changes."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "secret:private-key:app/infrastructure/terraform/networking.tf:sha256:007e37e7efe98887b5886da2690d834de9c02e7e7f2dc702bbbb1d7ed2f5843a"   # private-key app/infrastructure/terraform/networking.tf:171
+    reason: "Copy of the misplaced-IaC challenge key; nothing deploys app/infrastructure/ (gating-policy rules 4 and 5)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "secret:private-key:app/lib/insecurity.ts:sha256:252770604bb12a292b2c2a2fa86eee7b639232b3a020c0b77eaa8e86247f1fa1"   # private-key app/lib/insecurity.ts:21
+    reason: "Juice Shop's JWT signing key, published upstream on purpose for the JWT forging challenges; it signs only tokens for this deliberately vulnerable app."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "secret:generic-api-key:app/routes/login.ts:sha256:07afada2d81267b59eea355307a3ee3f1be5132ce91123e64869cf4ffaf93615"   # generic-api-key app/routes/login.ts:64
+    reason: "Same seeded challenge password as users.yml:88, compared in the challenge check; public upstream, not a real account."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "secret:private-key:app/terraform/networking.tf:sha256:007e37e7efe98887b5886da2690d834de9c02e7e7f2dc702bbbb1d7ed2f5843a"   # private-key app/terraform/networking.tf:171
+    reason: "TLS private key in upstream's misplaced-IaC challenge files (marked vuln-line); nothing deploys app/terraform/ (gating-policy rule 4)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+
+  # --- rule 3 ---
+  - fingerprint: "vuln:CVE-2026-101896:@angular/router:22.1.1"   # CVE-2026-101896 @angular/router@22.1.1
+    reason: "Ships in the browser bundle (direct frontend dependency); fix 22.2.0 is a minor bump of the Angular set. Deferred to phase 8 (short expiry)."
+    owner: quocthinhluu97
+    expires: 2026-11-30
+  - fingerprint: "vuln:CVE-2026-19481:@fastify/busboy:2.1.1"   # CVE-2026-19481 @fastify/busboy@2.1.1
+    reason: "Pulled in only by undici 5.29.0 (via @ai-sdk/provider-utils, used by routes/chat.ts), which requires @fastify/busboy ^2.0.0; the fix 3.2.1 is a major, so it needs an undici upgrade or an override. Whether newer undici still uses busboy is not checked."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:NSWG-ECO-428:base64url:0.0.6"   # NSWG-ECO-428 base64url@0.0.6
+    reason: "Pulled in only via jwa 0.0.1 / jws 0.2.6 under the deliberate jsonwebtoken pins (JWT challenges); fixed only by bumping those."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-87776:compression:1.8.1"   # CVE-2026-87776 compression@1.8.1
+    reason: "Reachable (direct, server.ts); the 1.8.2 patch is inside the ^1.8.1 range, so a lockfile refresh fixes it. Deferred to phase 8 (short expiry)."
+    owner: quocthinhluu97
+    expires: 2026-11-30
+  - fingerprint: "vuln:CVE-2023-46233:crypto-js:3.3.0"   # CVE-2023-46233 crypto-js@3.3.0
+    reason: "Via pdfkit 0.11.0: crypto-js runs (MD5 file ID) but neither vulnerable function does; PBKDF2 is never called and WordArray.random only for password-protected PDFs, which routes/order.ts never makes (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-71851:crypto-js:3.3.0"   # CVE-2026-71851 crypto-js@3.3.0
+    reason: "Via pdfkit 0.11.0: crypto-js runs (MD5 file ID) but neither vulnerable function does; PBKDF2 is never called and WordArray.random only for password-protected PDFs, which routes/order.ts never makes (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-59725:engine.io:4.1.2"   # CVE-2026-59725 engine.io@4.1.2
+    reason: "Reachable before login, server-side only: socket.io 3.1.2 (lib/startup/registerWebsocketEvents.ts) receives every inbound packet through engine.io. Not deliberate. The fix (6.6.7) needs socket.io 3 -> 4 (major): socket.io pins engine.io ~4.1.0. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2020-15084:express-jwt:0.1.3"   # CVE-2020-15084 express-jwt@0.1.3
+    reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-106445:handlebars:4.7.9"   # CVE-2026-106445 handlebars@4.7.9
+    reason: "Reachable (hbs view engine, server.ts:164); hbs 4.2.1 pins handlebars exactly at 4.7.9, so the 4.7.10 patch needs an npm override or a newer hbs. Deferred to phase 8 (short expiry)."
+    owner: quocthinhluu97
+    expires: 2026-11-30
+  - fingerprint: "vuln:CVE-2026-106446:handlebars:4.7.9"   # CVE-2026-106446 handlebars@4.7.9
+    reason: "Reachable (hbs view engine, server.ts:164); hbs 4.2.1 pins handlebars exactly at 4.7.9, so the 4.7.10 patch needs an npm override or a newer hbs. Deferred to phase 8 (short expiry)."
+    owner: quocthinhluu97
+    expires: 2026-11-30
+  - fingerprint: "vuln:CVE-2022-25881:http-cache-semantics:3.8.1"   # CVE-2022-25881 http-cache-semantics@3.8.1
+    reason: "Via cacheable-request <- got 8 <- download, used at startup to fetch configured image URLs; the ReDoS needs a hostile Cache-Control header from a server we chose."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2015-9235:jsonwebtoken:0.1.0"   # CVE-2015-9235 jsonwebtoken@0.1.0
+    reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2022-23539:jsonwebtoken:0.1.0"   # CVE-2022-23539 jsonwebtoken@0.1.0
+    reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:NSWG-ECO-17:jsonwebtoken:0.1.0"   # NSWG-ECO-17 jsonwebtoken@0.1.0
+    reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2015-9235:jsonwebtoken:0.4.0"   # CVE-2015-9235 jsonwebtoken@0.4.0
+    reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2022-23539:jsonwebtoken:0.4.0"   # CVE-2022-23539 jsonwebtoken@0.4.0
+    reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:NSWG-ECO-17:jsonwebtoken:0.4.0"   # NSWG-ECO-17 jsonwebtoken@0.4.0
+    reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2016-1000223:jws:0.2.6"   # CVE-2016-1000223 jws@0.2.6
+    reason: "Pulled in only by the deliberate jsonwebtoken 0.1.0/0.4.0 pins (JWT challenges, docs/findings/trivy.md); fixed only by bumping those."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2025-65945:jws:0.2.6"   # CVE-2025-65945 jws@0.2.6
+    reason: "Pulled in only by the deliberate jsonwebtoken 0.1.0/0.4.0 pins (JWT challenges, docs/findings/trivy.md); fixed only by bumping those."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2018-16487:lodash:2.4.2"   # CVE-2018-16487 lodash@2.4.2
+    reason: "lodash 2.4.2 comes only from the deliberate sanitize-html 1.4.2 pin (XSS challenges); the app's own lodash is 4.18.1. Fixed only by bumping that pin."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2019-10744:lodash:2.4.2"   # CVE-2019-10744 lodash@2.4.2
+    reason: "lodash 2.4.2 comes only from the deliberate sanitize-html 1.4.2 pin (XSS challenges); the app's own lodash is 4.18.1. Fixed only by bumping that pin."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2021-23337:lodash:2.4.2"   # CVE-2021-23337 lodash@2.4.2
+    reason: "lodash 2.4.2 comes only from the deliberate sanitize-html 1.4.2 pin (XSS challenges); the app's own lodash is 4.18.1. Fixed only by bumping that pin."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-26996:minimatch:3.0.5"   # CVE-2026-26996 minimatch@3.0.5
+    reason: "minimatch 3.0.5 pinned exactly by replace 1.2.2, used at startup (lib/startup/customize*.ts) with fixed patterns from config, so the ReDoS input is not attacker-controlled."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-27903:minimatch:3.0.5"   # CVE-2026-27903 minimatch@3.0.5
+    reason: "minimatch 3.0.5 pinned exactly by replace 1.2.2, used at startup (lib/startup/customize*.ts) with fixed patterns from config, so the ReDoS input is not attacker-controlled."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-27904:minimatch:3.0.5"   # CVE-2026-27904 minimatch@3.0.5
+    reason: "minimatch 3.0.5 pinned exactly by replace 1.2.2, used at startup (lib/startup/customize*.ts) with fixed patterns from config, so the ReDoS input is not attacker-controlled."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2017-18214:moment:2.0.0"   # CVE-2017-18214 moment@2.0.0
+    reason: "moment 2.0.0 comes only from the deliberate jsonwebtoken 0.1.0 pin (JWT challenges); the app's own moment is 2.30.1. Fixed only by bumping that pin."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2022-24785:moment:2.0.0"   # CVE-2022-24785 moment@2.0.0
+    reason: "moment 2.0.0 comes only from the deliberate jsonwebtoken 0.1.0 pin (JWT challenges); the app's own moment is 2.30.1. Fixed only by bumping that pin."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2025-47935:multer:1.4.5-lts.2"   # CVE-2025-47935 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2025-47944:multer:1.4.5-lts.2"   # CVE-2025-47944 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2025-48997:multer:1.4.5-lts.2"   # CVE-2025-48997 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2025-7338:multer:1.4.5-lts.2"   # CVE-2025-7338 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-2359:multer:1.4.5-lts.2"   # CVE-2026-2359 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-3304:multer:1.4.5-lts.2"   # CVE-2026-3304 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-3520:multer:1.4.5-lts.2"   # CVE-2026-3520 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-5079:multer:1.4.5-lts.2"   # CVE-2026-5079 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-77078:multer:1.4.5-lts.2"   # CVE-2026-77078 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-82333:multer:1.4.5-lts.2"   # CVE-2026-82333 multer@1.4.5-lts.2
+    reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-90711:proxy-addr:2.0.7"   # CVE-2026-90711 proxy-addr@2.0.7
+    reason: "Reachable (express core); 2.0.8 is inside express's ~2.0.7 range, so a lockfile refresh fixes it. Deferred to phase 8 (short expiry)."
+    owner: quocthinhluu97
+    expires: 2026-11-30
+  - fingerprint: "vuln:CVE-2022-25887:sanitize-html:1.4.2"   # CVE-2022-25887 sanitize-html@1.4.2
+    reason: "Deliberately ancient direct pin used by lib/insecurity.ts for the XSS challenges (docs/findings/trivy.md); bumping breaks them."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-33151:socket.io-parser:4.0.5"   # CVE-2026-33151 socket.io-parser@4.0.5
+    reason: "Reachable before login: socket.io 3.1.2 (lib/startup/registerWebsocketEvents.ts) parses every inbound packet with it, and socket.io-parser 4.0.5 also ships in the frontend bundle via socket.io-client 3.1.3. Not deliberate. The fix needs socket.io 3 -> 4 (major): socket.io pins socket.io-parser ~4.0.3. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-69185:socket.io-parser:4.0.5"   # CVE-2026-69185 socket.io-parser@4.0.5
+    reason: "Reachable before login: socket.io 3.1.2 (lib/startup/registerWebsocketEvents.ts) parses every inbound packet with it, and socket.io-parser 4.0.5 also ships in the frontend bundle via socket.io-client 3.1.3. Not deliberate. The fix needs socket.io 3 -> 4 (major): socket.io pins socket.io-parser ~4.0.3. Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-93749:source-map-js:1.2.1"   # CVE-2026-93749 source-map-js@1.2.1
+    reason: "Frontend build/test tooling only: top parents are @angular/build, sass, vitest, jsdom and @vitest/coverage-v8 (a devDependency not on BUILD_TOOL_PARENTS); not in the browser bundle or the image."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-23745:tar:6.2.1"   # CVE-2026-23745 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-23950:tar:6.2.1"   # CVE-2026-23950 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-24842:tar:6.2.1"   # CVE-2026-24842 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-26960:tar:6.2.1"   # CVE-2026-26960 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-29786:tar:6.2.1"   # CVE-2026-29786 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-31802:tar:6.2.1"   # CVE-2026-31802 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-59873:tar:6.2.1"   # CVE-2026-59873 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-59874:tar:6.2.1"   # CVE-2026-59874 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-73566:tar:6.2.1"   # CVE-2026-73566 tar@6.2.1
+    reason: "Via sqlite3 5.1.7 / node-gyp / cacache for native builds; not required by sqlite3/lib (grep-level), so install-time only, not at runtime. Every fix is on tar 7.x (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-12151:undici:5.29.0"   # CVE-2026-12151 undici@5.29.0
+    reason: "Via @ai-sdk/provider-utils (requires undici ^5.29.0, used by routes/chat.ts); every fix is on undici 6+, so it needs a parent upgrade or an override (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-1526:undici:5.29.0"   # CVE-2026-1526 undici@5.29.0
+    reason: "Via @ai-sdk/provider-utils (requires undici ^5.29.0, used by routes/chat.ts); every fix is on undici 6+, so it needs a parent upgrade or an override (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-2229:undici:5.29.0"   # CVE-2026-2229 undici@5.29.0
+    reason: "Via @ai-sdk/provider-utils (requires undici ^5.29.0, used by routes/chat.ts); every fix is on undici 6+, so it needs a parent upgrade or an override (docs/findings/trivy.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2024-37890:ws:7.4.6"   # CVE-2024-37890 ws@7.4.6
+    reason: "Reachable before login, server-side: engine.io 4.1.2 (under socket.io 3.1.2, lib/startup/registerWebsocketEvents.ts) handles websocket connections with ws. Not deliberate. The fix needs socket.io 3 -> 4 (major): engine.io pins ws ~7.4.2. The frontend-lockfile copy (via engine.io-client) is believed unused in the browser build, which uses the native WebSocket (unverified). Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-48779:ws:7.4.6"   # CVE-2026-48779 ws@7.4.6
+    reason: "Reachable before login, server-side: engine.io 4.1.2 (under socket.io 3.1.2, lib/startup/registerWebsocketEvents.ts) handles websocket connections with ws. Not deliberate. The fix needs socket.io 3 -> 4 (major): engine.io pins ws ~7.4.2. The frontend-lockfile copy (via engine.io-client) is believed unused in the browser build, which uses the native WebSocket (unverified). Phase 8 candidate; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-48779:ws:8.18.0"   # CVE-2026-48779 ws@8.18.0
+    reason: "Frontend only, via ethers 5 (@ethersproject/providers). Its browser build is believed to use the native WebSocket instead of ws, but this is unverified (docs/findings/trivy.md); short expiry until it is checked in phase 8."
+    owner: quocthinhluu97
+    expires: 2026-11-30
+
+  # --- rule 4 ---
+  - fingerprint: "code:semgrep:javascript.express.security.audit.remote-property-injection.remote-property-injection:app/routes/currentUser.ts:31"   # javascript.express.security.audit.remote-property-injection.remote-property-injection app/routes/currentUser.ts:31
+    reason: "Deliberate property injection (?fields=password) for the 'password hash leak' challenge (docs/findings/semgrep.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "code:semgrep:javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection:app/routes/login.ts:34"   # javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection app/routes/login.ts:34
+    reason: "Deliberate SQL injection for the 'Login Admin' challenge (docs/findings/semgrep.md); fixing it breaks the challenge."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "code:semgrep:javascript.lang.security.audit.code-string-concat.code-string-concat:app/routes/userProfile.ts:65"   # javascript.lang.security.audit.code-string-concat.code-string-concat app/routes/userProfile.ts:65
+    reason: "Deliberate eval() on the username for the SSTI/username challenge (docs/findings/semgrep.md)."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+
+  # --- rule 6 ---
+  - fingerprint: "dast:10028:http://juice:3000"   # 10028 http://juice:3000
+    reason: "Deliberate open redirect for the /redirect?to= challenge (docs/findings/zap.md); a code fix would break the challenge."
+    owner: quocthinhluu97
+    expires: 2027-01-16

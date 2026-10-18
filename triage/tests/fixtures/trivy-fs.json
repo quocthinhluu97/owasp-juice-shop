@@ -1,0 +1,1280 @@
+{
+  "SchemaVersion": 2,
+  "Trivy": {
+    "Version": "0.75.0"
+  },
+  "ReportID": "01a135e2-77a4-79eb-8bce-ce773c90aef0",
+  "CreatedAt": "2026-10-13T15:29:56.64465252Z",
+  "ArtifactName": "/src/app",
+  "ArtifactType": "filesystem",
+  "Results": [
+    {
+      "Target": "frontend/package-lock.json",
+      "Class": "lang-pkgs",
+      "Type": "npm",
+      "Packages": [
+        {
+          "ID": "@angular/build@22.1.3",
+          "Name": "@angular/build",
+          "Identifier": {
+            "PURL": "pkg:npm/%40angular/build@22.1.3",
+            "UID": "54bc981b82b0c4c"
+          },
+          "Version": "22.1.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@ampproject/remapping@2.3.0",
+            "@angular-devkit/architect@0.2201.3",
+            "@angular/compiler-cli@22.1.1",
+            "@angular/compiler@22.1.1",
+            "@angular/core@22.1.1",
+            "@angular/platform-browser@22.1.1",
+            "@babel/core@8.0.1",
+            "@babel/helper-annotate-as-pure@8.0.0",
+            "@babel/helper-split-export-declaration@7.24.7",
+            "@inquirer/confirm@6.1.1",
+            "@vitejs/plugin-basic-ssl@2.3.0",
+            "beasties@0.4.3",
+            "browserslist@4.28.8",
+            "esbuild@0.28.1",
+            "https-proxy-agent@9.1.0",
+            "jsonc-parser@3.3.1",
+            "listr2@10.2.2",
+            "lmdb@3.5.6",
+            "magic-string@1.0.0",
+            "mrmime@2.0.1",
+            "oxc-parser@0.142.0",
+            "parse5-html-rewriting-stream@8.0.1",
+            "picomatch@4.0.5",
+            "piscina@5.2.0",
+            "postcss@8.5.26",
+            "rolldown@1.2.0",
+            "sass@1.101.0",
+            "semver@7.8.5",
+            "source-map-support@0.5.21",
+            "tinyglobby@0.2.17",
+            "tslib@2.8.1",
+            "typescript@6.0.3",
+            "vite@8.1.5",
+            "vitest@4.1.10",
+            "watchpack@2.5.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 278,
+              "EndLine": 383
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@angular/cli@22.1.3",
+          "Name": "@angular/cli",
+          "Identifier": {
+            "PURL": "pkg:npm/%40angular/cli@22.1.3",
+            "UID": "7f5407b3e1ad543c"
+          },
+          "Version": "22.1.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@angular-devkit/architect@0.2201.3",
+            "@angular-devkit/core@22.1.3",
+            "@angular-devkit/schematics@22.1.3",
+            "@inquirer/prompts@8.5.2",
+            "@listr2/prompt-adapter-inquirer@4.2.4",
+            "@modelcontextprotocol/sdk@1.29.0",
+            "@schematics/angular@22.1.3",
+            "jsonc-parser@3.3.1",
+            "listr2@10.2.2",
+            "npm-package-arg@14.0.0",
+            "parse5-html-rewriting-stream@8.0.1",
+            "semver@7.8.5",
+            "yargs@18.0.0",
+            "zod@4.4.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 442,
+              "EndLine": 471
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@cyclonedx/cyclonedx-esbuild@1.4.3",
+          "Name": "@cyclonedx/cyclonedx-esbuild",
+          "Identifier": {
+            "PURL": "pkg:npm/%40cyclonedx/cyclonedx-esbuild@1.4.3",
+            "UID": "61028974842cb635"
+          },
+          "Version": "1.4.3",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@cyclonedx/cyclonedx-library@10.1.1",
+            "ajv-formats-draft2019@1.6.1",
+            "ajv-formats@3.0.1",
+            "ajv@8.20.0",
+            "commander@14.0.3",
+            "esbuild@0.28.1",
+            "normalize-package-data@8.0.0",
+            "packageurl-js@2.0.1",
+            "spdx-expression-parse@4.0.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 1354,
+              "EndLine": 1392
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "jsdom@29.1.1",
+          "Name": "jsdom",
+          "Identifier": {
+            "PURL": "pkg:npm/jsdom@29.1.1",
+            "UID": "b726ea9d942e08c2"
+          },
+          "Version": "29.1.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@asamuzakjp/css-color@5.1.11",
+            "@asamuzakjp/dom-selector@7.1.1",
+            "@bramus/specificity@2.4.2",
+            "@csstools/css-syntax-patches-for-csstree@1.1.7",
+            "@exodus/bytes@1.15.1",
+            "css-tree@3.2.1",
+            "data-urls@7.0.0",
+            "decimal.js@10.6.0",
+            "html-encoding-sniffer@6.0.0",
+            "is-potential-custom-element-name@1.0.1",
+            "lru-cache@11.2.7",
+            "parse5@8.0.1",
+            "saxes@6.0.0",
+            "symbol-tree@3.2.4",
+            "tough-cookie@6.0.2",
+            "undici@7.29.0",
+            "w3c-xmlserializer@5.0.0",
+            "webidl-conversions@8.0.1",
+            "whatwg-mimetype@5.0.0",
+            "whatwg-url@16.0.1",
+            "xml-name-validator@5.0.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 8656,
+              "EndLine": 8696
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@angular-devkit/architect@0.2201.3",
+          "Name": "@angular-devkit/architect",
+          "Identifier": {
+            "PURL": "pkg:npm/%40angular-devkit/architect@0.2201.3",
+            "UID": "3e1b1155601786a"
+          },
+          "Version": "0.2201.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@angular-devkit/core@22.1.3",
+            "rxjs@7.8.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 90,
+              "EndLine": 107
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@angular-devkit/core@22.1.3",
+          "Name": "@angular-devkit/core",
+          "Identifier": {
+            "PURL": "pkg:npm/%40angular-devkit/core@22.1.3",
+            "UID": "769e981120f7a424"
+          },
+          "Version": "22.1.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "ajv-formats@3.0.1",
+            "ajv@8.20.0",
+            "chokidar@5.0.0",
+            "jsonc-parser@3.3.1",
+            "picomatch@4.0.5",
+            "rxjs@7.8.2",
+            "source-map@0.7.6"
+          ],
+          "Locations": [
+            {
+              "StartLine": 108,
+              "EndLine": 134
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@angular-devkit/schematics@22.1.3",
+          "Name": "@angular-devkit/schematics",
+          "Identifier": {
+            "PURL": "pkg:npm/%40angular-devkit/schematics@22.1.3",
+            "UID": "50c21dcbddd121f"
+          },
+          "Version": "22.1.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@angular-devkit/core@22.1.3",
+            "jsonc-parser@3.3.1",
+            "magic-string@1.0.0",
+            "ora@9.4.1",
+            "rxjs@7.8.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 135,
+              "EndLine": 152
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@cyclonedx/cyclonedx-library@10.1.1",
+          "Name": "@cyclonedx/cyclonedx-library",
+          "Identifier": {
+            "PURL": "pkg:npm/%40cyclonedx/cyclonedx-library@10.1.1",
+            "UID": "54d3811085be4e33"
+          },
+          "Version": "10.1.1",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "ajv-formats-draft2019@1.6.1",
+            "ajv-formats@3.0.1",
+            "ajv@8.20.0",
+            "packageurl-js@2.0.1",
+            "spdx-expression-parse@4.0.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 1393,
+              "EndLine": 1439
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@modelcontextprotocol/sdk@1.29.0",
+          "Name": "@modelcontextprotocol/sdk",
+          "Identifier": {
+            "PURL": "pkg:npm/%40modelcontextprotocol/sdk@1.29.0",
+            "UID": "c0207c820f5baca4"
+          },
+          "Version": "1.29.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@hono/node-server@1.19.17",
+            "ajv-formats@3.0.1",
+            "ajv@8.20.0",
+            "content-type@1.0.5",
+            "cors@2.8.6",
+            "cross-spawn@7.0.6",
+            "eventsource-parser@3.1.1",
+            "eventsource@3.0.7",
+            "express-rate-limit@8.6.2",
+            "express@5.2.1",
+            "hono@4.13.1",
+            "jose@6.2.8",
+            "json-schema-typed@8.0.2",
+            "pkce-challenge@5.0.1",
+            "raw-body@3.0.2",
+            "zod-to-json-schema@3.25.2",
+            "zod@4.4.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 3531,
+              "EndLine": 3570
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@schematics/angular@22.1.3",
+          "Name": "@schematics/angular",
+          "Identifier": {
+            "PURL": "pkg:npm/%40schematics/angular@22.1.3",
+            "UID": "f578419c208d2831"
+          },
+          "Version": "22.1.3",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@angular-devkit/core@22.1.3",
+            "@angular-devkit/schematics@22.1.3",
+            "jsonc-parser@3.3.1",
+            "typescript@6.0.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 4981,
+              "EndLine": 4997
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "ajv@8.20.0",
+          "Name": "ajv",
+          "Identifier": {
+            "PURL": "pkg:npm/ajv@8.20.0",
+            "UID": "bbfbb1c93a98099f"
+          },
+          "Version": "8.20.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "fast-deep-equal@3.1.3",
+            "fast-uri@3.1.5",
+            "json-schema-traverse@1.0.0",
+            "require-from-string@2.0.2"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5736,
+              "EndLine": 5751
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "ajv-formats@3.0.1",
+          "Name": "ajv-formats",
+          "Identifier": {
+            "PURL": "pkg:npm/ajv-formats@3.0.1",
+            "UID": "73782aa8945719bd"
+          },
+          "Version": "3.0.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "ajv@8.20.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5752,
+              "EndLine": 5768
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "ajv-formats-draft2019@1.6.1",
+          "Name": "ajv-formats-draft2019",
+          "Identifier": {
+            "PURL": "pkg:npm/ajv-formats-draft2019@1.6.1",
+            "UID": "51dae8fc7fbc745e"
+          },
+          "Version": "1.6.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "ajv@8.20.0",
+            "punycode@2.3.1",
+            "schemes@1.4.0",
+            "smtp-address-parser@1.1.0",
+            "uri-js@4.4.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5769,
+              "EndLine": 5784
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "fast-uri@3.1.5",
+          "Name": "fast-uri",
+          "Identifier": {
+            "PURL": "pkg:npm/fast-uri@3.1.5",
+            "UID": "b62783358de8317f"
+          },
+          "Version": "3.1.5",
+          "Licenses": [
+            "BSD-3-Clause"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 7746,
+              "EndLine": 7761
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "undici@7.29.0",
+          "Name": "undici",
+          "Identifier": {
+            "PURL": "pkg:npm/undici@7.29.0",
+            "UID": "875bb69e09bf880c"
+          },
+          "Version": "7.29.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 12090,
+              "EndLine": 12099
+            }
+          ],
+          "AnalyzedBy": "npm"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-75899",
+          "VendorIDs": [
+            "GHSA-fph4-wmhf-6fwf"
+          ],
+          "PkgID": "fast-uri@3.1.5",
+          "PkgName": "fast-uri",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/fast-uri@3.1.5",
+            "UID": "b62783358de8317f"
+          },
+          "InstalledVersion": "3.1.5",
+          "FixedVersion": "2.4.5, 3.1.6, 4.1.3",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-75899",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:5ee13e0e9bdc2dd851f68d3ea95550caf54a69eeba5914a0b20cbce913b3beb1",
+          "Title": "fast-uri: fast-uri: Server-Side Request Forgery via repeated hostname percent-decoding",
+          "Description": "fast-uri is a URI parser for Node.js. It decodes percent escapes in a hostname during parsing and then decodes the parsed hostname a second time during authority recomposition, so a single call to normalize or resolve can turn nested percent-encoded input into a different network destination such as a loopback hostname or address. For example, a doubly encoded host that spells out a loopback name decodes to that live host in one operation, which contradicts RFC 3986 section 2.4 that an implementation must not decode the same string more than once. An application that normalizes or resolves an untrusted HTTP-family URI before outbound routing, redirect validation, or a host-policy check can receive a destination different from the one the original encoded host represented, giving a server-side request forgery and host-policy bypass primitive. This is an incomplete-fix variant of CVE-2026-6322. The affected versions are 2.4.1 up to but not including 2.4.5, 3.1.2 up to but not including 3.1.6, and 4.0.0 up to but not including 4.1.3. The issue is fixed in 2.4.5, 3.1.6, and 4.1.3, which normalize percent escapes once and preserve encoded percent signs. Users should upgrade to a patched version.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-174",
+            "CWE-918"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "ghsa": 3,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:71543",
+            "https://access.redhat.com/security/cve/CVE-2026-75899",
+            "https://advisory.echohq.com/cve/CVE-2026-75899",
+            "https://bugzilla.redhat.com/2521778",
+            "https://bugzilla.redhat.com/2521779",
+            "https://bugzilla.redhat.com/2521798",
+            "https://bugzilla.redhat.com/2527747",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2521778",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2521779",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2521798",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2527747",
+            "https://cna.openjsf.org/security-advisories.html",
+            "https://creativecommons.org/licenses/by/4.0/",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-75899",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-75975",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-76172",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-84292",
+            "https://errata.almalinux.org/10/ALSA-2026-71543.html",
+            "https://errata.rockylinux.org/RLSA-2026:71543",
+            "https://github.com/fastify/fast-uri",
+            "https://github.com/fastify/fast-uri/commit/2642290672e7211c990aaed3749c2ce667d0af4f",
+            "https://github.com/fastify/fast-uri/commit/8c15dbe94ec50bb8e595791ebb42c35cef0fd304",
+            "https://github.com/fastify/fast-uri/commit/ae92a4c5d8c4b6c9e447f048d5fcbde7eebd5514",
+            "https://github.com/fastify/fast-uri/releases/tag/v2.4.5",
+            "https://github.com/fastify/fast-uri/releases/tag/v3.1.6",
+            "https://github.com/fastify/fast-uri/releases/tag/v4.1.3",
+            "https://github.com/fastify/fast-uri/security/advisories/GHSA-fph4-wmhf-6fwf",
+            "https://linux.oracle.com/cve/CVE-2026-75899.html",
+            "https://linux.oracle.com/errata/ELSA-2026-71543.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-75899",
+            "https://www.cve.org/CVERecord?id=CVE-2026-75899"
+          ],
+          "PublishedDate": "2026-08-24T10:16:39.96Z",
+          "LastModifiedDate": "2026-09-02T14:43:19.097Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-84961",
+          "VendorIDs": [
+            "GHSA-w293-vg96-wgc3"
+          ],
+          "PkgID": "undici@7.29.0",
+          "PkgName": "undici",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/undici@7.29.0",
+            "UID": "875bb69e09bf880c"
+          },
+          "InstalledVersion": "7.29.0",
+          "FixedVersion": "7.29.1, 8.10.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-84961",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:4dd32366304296a6c8ba471adf7189eb6d869b0df72a1f4839830dcf4b566b07",
+          "Title": "undici: undici: TLS certificate validation bypass in BalancedPool via dropped connect options",
+          "Description": "undici's BalancedPool constructor passes its entire options object through an internal deep-clone that serializes and reparses the value as JSON. Because JSON cannot represent functions, any function-valued TLS option, such as a caller-supplied checkServerIdentity callback or a custom connector inside the connect option, is silently discarded before it reaches the TLS layer. As a result a peer whose certificate the application's custom checkServerIdentity was written to reject, but which still passes Node's default hostname and chain checks, is accepted when reached through BalancedPool. The Client, Pool, and Agent dispatchers are not affected because they extract the connect and tls options before cloning. This affects undici versions from 7.24.1 up to 7.29.1 and from 8.0.0 up to 8.10.2, and only when the application supplies a function-valued connect or tls option to BalancedPool. Users should upgrade to undici 7.29.1 or 8.10.2.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-295"
+          ],
+          "VendorSeverity": {
+            "alma": 3,
+            "amazon": 3,
+            "ghsa": 3,
+            "nvd": 4,
+            "oracle-oval": 3,
+            "redhat": 3,
+            "rocky": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            },
+            "nvd": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 7.4
+            }
+          },
+          "References": [
+            "https://access.redhat.com/errata/RHSA-2026:73428",
+            "https://access.redhat.com/errata/RHSA-2026:73838",
+            "https://access.redhat.com/security/cve/CVE-2026-84961",
+            "https://bugzilla.redhat.com/2528735",
+            "https://bugzilla.redhat.com/2528759",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2528717",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2528735",
+            "https://bugzilla.redhat.com/show_bug.cgi?id=2528759",
+            "https://cna.openjsf.org/security-advisories.html",
+            "https://creativecommons.org/licenses/by/4.0/",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-19534",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-84961",
+            "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2026-85152",
+            "https://errata.almalinux.org/10/ALSA-2026-73428.html",
+            "https://errata.rockylinux.org/RLSA-2026:73838",
+            "https://github.com/nodejs/undici",
+            "https://github.com/nodejs/undici/commit/8f5868fbdbc8f1146dfc1bcd1f2d117790141390",
+            "https://github.com/nodejs/undici/commit/f690157d728508652fef14673630c71515123e96",
+            "https://github.com/nodejs/undici/releases/tag/v7.29.1",
+            "https://github.com/nodejs/undici/releases/tag/v8.10.2",
+            "https://github.com/nodejs/undici/security/advisories/GHSA-w293-vg96-wgc3",
+            "https://linux.oracle.com/cve/CVE-2026-84961.html",
+            "https://linux.oracle.com/errata/ELSA-2026-74085.html",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-84961",
+            "https://www.cve.org/CVERecord?id=CVE-2026-84961"
+          ],
+          "PublishedDate": "2026-09-04T17:17:02.227Z",
+          "LastModifiedDate": "2026-09-15T14:29:35.253Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-18540",
+          "VendorIDs": [
+            "GHSA-r53p-7pc4-xj5r"
+          ],
+          "PkgID": "undici@7.29.0",
+          "PkgName": "undici",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/undici@7.29.0",
+            "UID": "875bb69e09bf880c"
+          },
+          "InstalledVersion": "7.29.0",
+          "FixedVersion": "6.28.1, 7.29.1, 8.10.2",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-18540",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:4c86ff8c1ede9dffc9aa475c1067b30c0b020e27eb7859b6c803885e0cae56e2",
+          "Title": "undici: undici: HTTP response splitting via retry interceptor",
+          "Description": "undici's retry interceptor can append the body of a ranged retry response to bytes already delivered from an earlier partial response while still presenting the original response's status and headers. This happens when an upstream server delivers part of a body without a trustworthy resume checkpoint, for example a non-success response whose headers were already sent or a partial-content response with an unusable content range, then closes the connection and answers the resumed range request with more bytes. As a result the response body can be longer than the Content-Length that the application observes. An application that relays such a response to a downstream HTTP/1.1 peer without normalizing the framing can emit a body that exceeds the forwarded Content-Length, and the excess bytes can be interpreted as the start of a following response, which enables downstream response splitting or desynchronization. Exploitation requires an attacker-controlled upstream server and an application that forwards the response through a framing-sensitive path. This affects undici versions before 6.28.1, from 7.0.0 up to 7.29.1, and from 8.0.0 up to 8.10.2. Users should upgrade to undici 6.28.1, 7.29.1, or 8.10.2.",
+          "Severity": "LOW",
+          "CweIDs": [
+            "CWE-444"
+          ],
+          "VendorSeverity": {
+            "amazon": 3,
+            "ghsa": 1,
+            "redhat": 1
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "V3Score": 3.7
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:N",
+              "V3Score": 3.7
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-18540",
+            "https://advisory.echohq.com/cve/CVE-2026-18540",
+            "https://cna.openjsf.org/security-advisories.html",
+            "https://github.com/nodejs/undici",
+            "https://github.com/nodejs/undici/commit/0160a719063fb0a77f4fdf9500b9166b91e14329",
+            "https://github.com/nodejs/undici/commit/cd8af90b38ae33c2838d54a2d629774122effe95",
+            "https://github.com/nodejs/undici/commit/ce31bc824b578008faae5d3350da66c1b5f71548",
+            "https://github.com/nodejs/undici/releases/tag/v6.28.1",
+            "https://github.com/nodejs/undici/releases/tag/v7.29.1",
+            "https://github.com/nodejs/undici/releases/tag/v8.10.2",
+            "https://github.com/nodejs/undici/security/advisories/GHSA-r53p-7pc4-xj5r",
+            "https://hackerone.com/reports/3900104",
+            "https://hackerone.com/reports/3900615",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-18540",
+            "https://www.cve.org/CVERecord?id=CVE-2026-18540"
+          ],
+          "PublishedDate": "2026-09-04T18:17:50.02Z",
+          "LastModifiedDate": "2026-09-16T20:41:17.627Z"
+        }
+      ]
+    },
+    {
+      "Target": "package-lock.json",
+      "Class": "lang-pkgs",
+      "Type": "npm",
+      "Packages": [
+        {
+          "ID": "@ai-sdk/openai-compatible@2.0.65",
+          "Name": "@ai-sdk/openai-compatible",
+          "Identifier": {
+            "PURL": "pkg:npm/%40ai-sdk/openai-compatible@2.0.65",
+            "UID": "e3f33eb51a220c9e"
+          },
+          "Version": "2.0.65",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@ai-sdk/provider-utils@4.0.43",
+            "@ai-sdk/provider@3.0.14",
+            "zod@4.4.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 169,
+              "EndLine": 184
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "ai@6.0.247",
+          "Name": "ai",
+          "Identifier": {
+            "PURL": "pkg:npm/ai@6.0.247",
+            "UID": "f87b51e8b849113b"
+          },
+          "Version": "6.0.247",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "@ai-sdk/gateway@3.0.167",
+            "@ai-sdk/provider-utils@4.0.43",
+            "@ai-sdk/provider@3.0.14",
+            "@opentelemetry/api@1.9.1",
+            "zod@4.4.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 3180,
+              "EndLine": 3197
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "download@8.0.0",
+          "Name": "download",
+          "Identifier": {
+            "PURL": "pkg:npm/download@8.0.0",
+            "UID": "2574ff55acc4c1ea"
+          },
+          "Version": "8.0.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "archive-type@4.0.0",
+            "content-disposition@0.5.4",
+            "decompress@4.2.1",
+            "ext-name@5.0.0",
+            "file-type@11.1.0",
+            "filenamify@3.0.0",
+            "get-stream@4.1.0",
+            "got@8.3.2",
+            "make-dir@2.1.0",
+            "p-event@2.3.1",
+            "pify@4.0.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5623,
+              "EndLine": 5644
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "express-jwt@0.1.3",
+          "Name": "express-jwt",
+          "Identifier": {
+            "PURL": "pkg:npm/express-jwt@0.1.3",
+            "UID": "762f415cd4cdb3ae"
+          },
+          "Version": "0.1.3",
+          "Relationship": "direct",
+          "DependsOn": [
+            "jsonwebtoken@0.1.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6987,
+              "EndLine": 6997
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "jsonwebtoken@0.4.0",
+          "Name": "jsonwebtoken",
+          "Identifier": {
+            "PURL": "pkg:npm/jsonwebtoken@0.4.0",
+            "UID": "1dc43cbbc6df90f7"
+          },
+          "Version": "0.4.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "jws@0.2.6"
+          ],
+          "Locations": [
+            {
+              "StartLine": 9545,
+              "EndLine": 9554
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "marsdb@0.6.11",
+          "Name": "marsdb",
+          "Identifier": {
+            "PURL": "pkg:npm/marsdb@0.6.11",
+            "UID": "ac4d1efcc29d0b47"
+          },
+          "Version": "0.6.11",
+          "Licenses": [
+            "MIT"
+          ],
+          "Relationship": "direct",
+          "DependsOn": [
+            "check-types@6.0.0",
+            "double-ended-queue@0.9.7",
+            "eventemitter3@1.1.1",
+            "fast.js@0.1.1",
+            "geojson-utils@1.1.0",
+            "invariant@2.2.4"
+          ],
+          "Locations": [
+            {
+              "StartLine": 10123,
+              "EndLine": 10136
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@ai-sdk/gateway@3.0.167",
+          "Name": "@ai-sdk/gateway",
+          "Identifier": {
+            "PURL": "pkg:npm/%40ai-sdk/gateway@3.0.167",
+            "UID": "6da8e1aa9515fe6d"
+          },
+          "Version": "3.0.167",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@ai-sdk/provider-utils@4.0.43",
+            "@ai-sdk/provider@3.0.14",
+            "@vercel/oidc@3.2.0",
+            "zod@4.4.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 152,
+              "EndLine": 168
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@ai-sdk/provider-utils@4.0.43",
+          "Name": "@ai-sdk/provider-utils",
+          "Identifier": {
+            "PURL": "pkg:npm/%40ai-sdk/provider-utils@4.0.43",
+            "UID": "67515abd4810f965"
+          },
+          "Version": "4.0.43",
+          "Licenses": [
+            "Apache-2.0"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@ai-sdk/provider@3.0.14",
+            "@standard-schema/spec@1.1.0",
+            "eventsource-parser@3.1.1",
+            "undici@5.29.0",
+            "zod@4.4.3"
+          ],
+          "Locations": [
+            {
+              "StartLine": 197,
+              "EndLine": 214
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "@fastify/busboy@2.1.1",
+          "Name": "@fastify/busboy",
+          "Identifier": {
+            "PURL": "pkg:npm/%40fastify/busboy@2.1.1",
+            "UID": "bb88a553e55f9e10"
+          },
+          "Version": "2.1.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 1434,
+              "EndLine": 1442
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "base64url@0.0.6",
+          "Name": "base64url",
+          "Identifier": {
+            "PURL": "pkg:npm/base64url@0.0.6",
+            "UID": "d921010d7c9a1264"
+          },
+          "Version": "0.0.6",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "Locations": [
+            {
+              "StartLine": 3716,
+              "EndLine": 3721
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "decompress@4.2.1",
+          "Name": "decompress",
+          "Identifier": {
+            "PURL": "pkg:npm/decompress@4.2.1",
+            "UID": "bf9bb778e015f3ff"
+          },
+          "Version": "4.2.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "decompress-tar@4.1.1",
+            "decompress-tarbz2@4.1.1",
+            "decompress-targz@4.1.1",
+            "decompress-unzip@4.0.1",
+            "graceful-fs@4.2.11",
+            "make-dir@1.3.0",
+            "pify@2.3.0",
+            "strip-dirs@2.1.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 5134,
+              "EndLine": 5152
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "jsonwebtoken@0.1.0",
+          "Name": "jsonwebtoken",
+          "Identifier": {
+            "PURL": "pkg:npm/jsonwebtoken@0.1.0",
+            "UID": "c7fa2d28353ef984"
+          },
+          "Version": "0.1.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "jws@0.2.6",
+            "moment@2.0.0"
+          ],
+          "Locations": [
+            {
+              "StartLine": 6998,
+              "EndLine": 7008
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "jwa@0.0.1",
+          "Name": "jwa",
+          "Identifier": {
+            "PURL": "pkg:npm/jwa@0.0.1",
+            "UID": "11e61f75fa16bc4a"
+          },
+          "Version": "0.0.1",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "base64url@0.0.6"
+          ],
+          "Locations": [
+            {
+              "StartLine": 9597,
+              "EndLine": 9605
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "jws@0.2.6",
+          "Name": "jws",
+          "Identifier": {
+            "PURL": "pkg:npm/jws@0.2.6",
+            "UID": "73ec5ba4ef8c6764"
+          },
+          "Version": "0.2.6",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "base64url@0.0.6",
+            "jwa@0.0.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 9606,
+              "EndLine": 9616
+            }
+          ],
+          "AnalyzedBy": "npm"
+        },
+        {
+          "ID": "undici@5.29.0",
+          "Name": "undici",
+          "Identifier": {
+            "PURL": "pkg:npm/undici@5.29.0",
+            "UID": "78576c82b28299c1"
+          },
+          "Version": "5.29.0",
+          "Licenses": [
+            "MIT"
+          ],
+          "Indirect": true,
+          "Relationship": "indirect",
+          "DependsOn": [
+            "@fastify/busboy@2.1.1"
+          ],
+          "Locations": [
+            {
+              "StartLine": 15844,
+              "EndLine": 15855
+            }
+          ],
+          "AnalyzedBy": "npm"
+        }
+      ],
+      "Vulnerabilities": [
+        {
+          "VulnerabilityID": "CVE-2026-19481",
+          "VendorIDs": [
+            "GHSA-x8mw-p69m-v3mx"
+          ],
+          "PkgID": "@fastify/busboy@2.1.1",
+          "PkgName": "@fastify/busboy",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/%40fastify/busboy@2.1.1",
+            "UID": "bb88a553e55f9e10"
+          },
+          "InstalledVersion": "2.1.1",
+          "FixedVersion": "3.2.1",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-19481",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:f949f244cdaee02d62a5843f90499b3616eda0dfa25fa6fd9e502b596e34c6c3",
+          "Title": "fastify/busboy: fastify/busboy: Denial of Service from crafted form-data headers",
+          "Description": "@fastify/busboy is a multipart form-data parser. In versions 1.0.0 through 3.2.0, an attacker who can submit multipart form-data can crash the parser by sending a part header whose name is a prototype-inherited property such as __proto__ or constructor. The internal header parser stores headers in a plain JavaScript object and assumes each value is an array, so an inherited property name resolves to a truthy non-array value and triggers a TypeError. In the common pipe integration the failure surfaces as an error event, but in direct write or end usage the exception is thrown synchronously and can terminate the Node.js process, causing an unauthenticated denial of service. The issue is fixed in @fastify/busboy 3.2.1, which creates the header object with a null prototype. Users should upgrade to 3.2.1.",
+          "Severity": "HIGH",
+          "CweIDs": [
+            "CWE-754"
+          ],
+          "VendorSeverity": {
+            "ghsa": 3,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+              "V3Score": 7.5
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-19481",
+            "https://cna.openjsf.org/security-advisories.html",
+            "https://github.com/fastify/busboy",
+            "https://github.com/fastify/busboy/commit/957a24b66d5915e6d0a6ac988c9dbcee86373e9b",
+            "https://github.com/fastify/busboy/releases/tag/v3.2.1",
+            "https://github.com/fastify/busboy/security/advisories/GHSA-x8mw-p69m-v3mx",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-19481",
+            "https://www.cve.org/CVERecord?id=CVE-2026-19481"
+          ],
+          "PublishedDate": "2026-08-13T09:17:12.573Z",
+          "LastModifiedDate": "2026-09-03T19:16:01.753Z"
+        },
+        {
+          "VulnerabilityID": "GHSA-rvg8-pwq2-xj7q",
+          "PkgID": "base64url@0.0.6",
+          "PkgName": "base64url",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/base64url@0.0.6",
+            "UID": "d921010d7c9a1264"
+          },
+          "InstalledVersion": "0.0.6",
+          "FixedVersion": "3.0.0",
+          "Status": "fixed",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://github.com/advisories/GHSA-rvg8-pwq2-xj7q",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:b763dd8d3c8990e577c4321008bad0f40399b40c4a82e4497c8a1f756de1347b",
+          "Title": "Out-of-bounds Read in base64url",
+          "Description": "Versions of `base64url` before 3.0.0 are vulnerable to to out-of-bounds reads as it allocates uninitialized Buffers when number is passed in input on Node.js 4.x and below.\n\n\n## Recommendation\n\nUpdate to version 3.0.0 or later.",
+          "Severity": "MEDIUM",
+          "VendorSeverity": {
+            "ghsa": 2
+          },
+          "References": [
+            "https://github.com/brianloveswords/base64url",
+            "https://github.com/brianloveswords/base64url/commit/4fbd954a0a69e9d898de2146557cc6e893e79542",
+            "https://github.com/brianloveswords/base64url/pull/25",
+            "https://hackerone.com/reports/321687"
+          ],
+          "PublishedDate": "2020-09-01T20:42:44Z",
+          "LastModifiedDate": "2021-09-24T20:34:56Z"
+        },
+        {
+          "VulnerabilityID": "CVE-2026-101894",
+          "VendorIDs": [
+            "GHSA-hrh2-vp3x-79xf"
+          ],
+          "PkgID": "decompress@4.2.1",
+          "PkgName": "decompress",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/decompress@4.2.1",
+            "UID": "bf9bb778e015f3ff"
+          },
+          "InstalledVersion": "4.2.1",
+          "Status": "affected",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://avd.aquasec.com/nvd/cve-2026-101894",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:9044493425d7ab646fb4b434c6e2bd61e386f7a0c8d9e1057fcc30a9bc10a0fc",
+          "Title": "@xhmikosr/decompress: @xhmikosr/decompress: Path traversal via symlink chain",
+          "Description": "The decompress package for Node.js extracts archives. Prior to 10.2.2 and 11.1.4, the default decompress(input, output) API relies on lexical containment checks that do not account for the kernel following a planted symlink chain. An attacker can supply a crafted archive containing chained symlink entries so that a later entry resolves outside the output directory. This allows files outside output to be read or written, and overwriting startup scripts or configuration can lead to remote code execution. The maintained @xhmikosr/decompress package is fixed in 10.2.2 and 11.1.4, but the separately affected unmaintained decompress package remains unpatched through 4.2.1. This vulnerability results from a bypass of the incomplete hardening for CVE-2026-53486. @xhmikosr/decompress is fixed in versions 10.2.2 and 11.1.4.",
+          "Severity": "CRITICAL",
+          "CweIDs": [
+            "CWE-22",
+            "CWE-59"
+          ],
+          "VendorSeverity": {
+            "ghsa": 4,
+            "redhat": 3
+          },
+          "CVSS": {
+            "ghsa": {
+              "V3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N",
+              "V3Score": 9.1
+            },
+            "redhat": {
+              "V3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:N",
+              "V3Score": 7.1
+            }
+          },
+          "References": [
+            "https://access.redhat.com/security/cve/CVE-2026-101894",
+            "https://github.com/XhmikosR/decompress",
+            "https://github.com/XhmikosR/decompress/commit/5f4b2f64abb31bbaf1fef8975b595fd7df2558d8",
+            "https://github.com/XhmikosR/decompress/commit/f6c88c668216d6a12c6cecf4fe0b6c70bf77050a",
+            "https://github.com/XhmikosR/decompress/releases/tag/v10.2.2",
+            "https://github.com/XhmikosR/decompress/releases/tag/v11.1.4",
+            "https://github.com/XhmikosR/decompress/security/advisories/GHSA-hrh2-vp3x-79xf",
+            "https://nvd.nist.gov/vuln/detail/CVE-2026-101894",
+            "https://www.cve.org/CVERecord?id=CVE-2026-101894"
+          ],
+          "PublishedDate": "2026-09-28T17:17:48.83Z",
+          "LastModifiedDate": "2026-09-30T19:38:27.293Z"
+        },
+        {
+          "VulnerabilityID": "GHSA-5mrr-rgp6-x4gr",
+          "PkgID": "marsdb@0.6.11",
+          "PkgName": "marsdb",
+          "PkgIdentifier": {
+            "PURL": "pkg:npm/marsdb@0.6.11",
+            "UID": "ac4d1efcc29d0b47"
+          },
+          "InstalledVersion": "0.6.11",
+          "Status": "affected",
+          "SeveritySource": "ghsa",
+          "PrimaryURL": "https://github.com/advisories/GHSA-5mrr-rgp6-x4gr",
+          "DataSource": {
+            "ID": "ghsa",
+            "Name": "GitHub Security Advisory npm",
+            "URL": "https://github.com/advisories?query=type%3Areviewed+ecosystem%3Anpm"
+          },
+          "Fingerprint": "sha256:c5c285a39263468142d2fc4bb8d577e280b38e3f61980b25e38763c41c6ad084",
+          "Title": "Command Injection in marsdb",
+          "Description": "All versions of `marsdb` are vulnerable to Command Injection. In the `DocumentMatcher` class, selectors on `$where` clauses are passed to a Function constructor unsanitized. This allows attackers to run arbitrary commands in the system when the function is executed.\n\n\n## Recommendation\n\nNo fix is currently available. Consider using an alternative package until a fix is made available.",
+          "Severity": "CRITICAL",
+          "VendorSeverity": {
+            "ghsa": 4
+          },
+          "References": [
+            "https://github.com/bkimminich/juice-shop/issues/1173",
+            "https://www.npmjs.com/advisories/1122"
+          ],
+          "PublishedDate": "2020-09-03T19:39:05Z",
+          "LastModifiedDate": "2020-08-31T18:48:01Z"
+        }
+      ]
+    }
+  ]
+}
