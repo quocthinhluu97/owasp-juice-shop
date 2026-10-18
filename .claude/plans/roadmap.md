@@ -14,7 +14,7 @@ Status: ✅ done · ▶ in progress · ☐ not started
 | 4 | Semgrep: insecure code patterns | ✅ |
 | 5 | Checkov: Dockerfile and workflow misconfiguration | ✅ |
 | 6 | ZAP baseline: passive scan of the running app | ✅ |
-| 7 | Triage script: one pass/fail decision | ▶ |
+| 7 | Triage script: one pass/fail decision | ✅ |
 | 8 | Fix a few findings | ☐ |
 | 9 | Lock down the pipeline | ☐ |
 
@@ -135,13 +135,13 @@ Goal: passively scan the running app over HTTP (no attacks).
 6. ✅ Generate rules file from `gen.conf`, set every rule to IGNORE/WARN/FAIL with reason in `.zap/rules.tsv`. Drafted 2026-10-13: 68 rules (FAIL 3: 10038, 10028, 10115, confirmed by user 2026-10-13; IGNORE 10; WARN 55), reviewed in step 9 (clean 2026-10-13).
 7. ✅ Re-run with rules file (2026-10-13): exit 1, 2:34. Console FAIL 2 (10028, 10038), WARN 7, IGNORE 4 (10049, 10096, 10109, 3), PASS 54 = 67; only juice:3000 in `site[]`, 174 endpoints, same 17 alertRefs as the pinned run. Exit 1 is expected (FAIL rules fired), but a missing rules file also exits 1, so the CI coverage check must run (see plan D7 correction).
 8. ✅ Write `docs/findings/zap.md`: summary, per-alert verdicts, JSON caps and fingerprint notes (D10), chosen phase 8 header.
-9. ▶ CI job `zap` written (2026-10-13): network `--internal`, pinned add-on, spider `-j`, rules file, coverage check on Juice site endpoint count and rule load (≥67). The app is only reachable inside the runner. CI check pending the first PR run (plan step 7).
+9. ✅ CI job `zap` written (2026-10-13): network `--internal`, pinned add-on, spider `-j`, rules file, coverage check on Juice site endpoint count and rule load (≥67). The app is only reachable inside the runner. CI verified: the PR #5 merge run (38422003321) passed with the zap job green.
 10. ✅ Docs written (2026-10-13): `local-scanning.md` (add-on, --internal), `phases.md` phase 6 (rules.tsv read by triage), `layout.md`.
 11. ✅ Review: round 1 (2026-10-13) found no bugs; fixes applied; round 2 clean (2026-10-13) (plan step 9). Then PR and merge.
 
-## Phase 7: Triage script ▶
+## Phase 7: Triage script ✅
 
-Plan: `.claude/plans/phase-7-triage.md` (approved 2026-10-18).
+Plan: `.claude/plans/phase-7-triage.md` (approved 2026-10-18; done 2026-10-18).
 
 Goal: one Python script decides pass or fail, using `gating-policy.md` and `triage-script.md`.
 
@@ -155,8 +155,8 @@ Goal: one Python script decides pass or fail, using `gating-policy.md` and `tria
 8. ✅ Reachability hints: prod versus dev dependency, build stage only versus final image, and a grep for imports labelled "grep-level evidence".
 9. ✅ Gating rules 1–6 in `policy.py`, each tested with a passing and a failing case. Each blocking finding names its rule number.
 10. ✅ Output: stdout summary plus `$GITHUB_STEP_SUMMARY`; `reports/triage.json`. Exit code 0 pass / 1 gate failed / 2 script error; never 0 on a parse error.
-11. ☐ CI job `triage`: `needs:` every scan job, downloads their artifacts, the only job that can fail the build.
-12. ☐ `code-reviewer` reviews; PR; merge.
+11. ✅ CI job `triage`: `needs:` every scan job, downloads their artifacts, the only job that can fail the build.
+12. ✅ `code-reviewer` reviews; PR; merge. (review clean 2026-10-18; merge pending)
 13. ☐ Make `triage` a required status check on `main` in GitHub branch protection **(you)**. → moved to phase 8
 
 **Expected:** the build goes red on the first run. That's the point. Read why, then go to phase 8 or add waivers with real reasons.

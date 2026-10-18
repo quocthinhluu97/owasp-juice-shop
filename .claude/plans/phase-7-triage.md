@@ -1,6 +1,6 @@
 # Phase 7: Triage script (plan)
 
-Status: **Approved: 2026-10-18** (decisions D4, D7, D9, D12 answered 2026-10-18) · Amendments D19, D20 decided by user 2026-10-18 · Branch: `phase-7-triage` · Pipeline: `.claude/rules/feature-pipeline.md`
+Status: **Approved: 2026-10-18** (decisions D4, D7, D9, D12 answered 2026-10-18) · Amendments D19, D20 decided by user 2026-10-18 · Branch: `phase-7-triage` · Pipeline: `.claude/rules/feature-pipeline.md` · CI verified 2026-10-18; ready to merge
 
 ## Context
 
@@ -67,12 +67,13 @@ One Python script reads the five scanners' reports, normalizes them to one `Find
    - **Result:** Run on CI run 38422003321 artifacts (`reports/ci-run/`), KEV catalog 2026.10.16 (no KEV hits). Exit 1, 77 blocking: rule 1 ×8, rule 3 ×62, rule 4 ×4, rule 5 ×1, rule 6 ×2. Dedupe: trivy 304→181, zap 15→13, semgrep secret merged into gitleaks. 24 frontend rows labelled build stage only (D7). Bug found and fixed: image+fs merge dropped the fs relationship/parents (dedupe now unions them; tests added).
 12. ✅ done 2026-10-18 **Waivers (you):** decide which blocking findings are deliberate challenge material; write those waivers with reasons (Claude can draft text from `docs/findings/*.md`, you confirm each). The rest stays red for phase 8.
    - **Result:** 69 waivers in `triage/waivers.yaml`, drafted by Claude from `docs/findings/*.md` and lockfile version ranges, accepted by the user 2026-10-18. Groups: deliberate challenge material (8 secrets, 3 Semgrep, ZAP 10028, JWT chain, sanitize-html + its lodash), not reachable at runtime (crypto-js, tar, minimatch, http-cache-semantics, source-map-js), fix needs a major/parent upgrade (multer, socket.io chain, undici + @fastify/busboy) — all expire 2027-01-16; cheap fixes deferred to phase 8 (compression, proxy-addr, handlebars, @angular/router) expire 2026-11-30. Left red for phase 8 (8 blocking after waivers): brace-expansion ×4 + js-yaml (lockfile drift → `npm ci`), `search.ts:23` (code fix), `CKV_DOCKER_7` on `/app/Dockerfile:22` (Dockerfile hardening), ZAP 10038 (CSP). Open check from the waivers: the ws 8.18.0 'browser build uses native WebSocket' claim is still unverified.
-13. ☐ **CI job** (D17). Update `security.yml` header comment, `layout.md`, `local-scanning.md` (D2), `phases.md` if needed, roadmap.
+13. ✅ done 2026-10-18 **CI job** (D17). Update `security.yml` header comment, `layout.md`, `local-scanning.md` (D2), `phases.md` if needed, roadmap.
    - **Check:** PR run: triage runs after all scans, shows the summary, fails or passes for the reasons in the report; a deliberately missing artifact gives exit 2 (test once by hand, then revert).
+   - **Result:** PR run: all five scan jobs green; triage exit 1, `Gate FAILED: 8 blocking` — identical to the local run on CI run 38422003321 (same counts table, 69 waived, 0 warnings, 164 report only). KEV: first run `download (catalog 2026.10.16)` and the cache was saved; the next run restored it and skipped the save. Missing-artifact check by hand: zap upload renamed to `zap-report-x` in a test commit → triage `missing report file(s) … reports/zap/zap.json`, exit 2, no gate output; the download step shows green because of continue-on-error (its error is in the run's annotations). Test commit reverted; next run back to exit 1, 8 blocking.
 14. ✅ done 2026-10-18 **Review:** `code-reviewer` on the final state; fixes via implementer; re-review until clean. Commit/PR when you ask.
    - **Result:** round 1 found 9 issues (KEV truncated-feed check, CI cache keyed on fetch date, HTTPException fallback, future `fetched_at`, overstated waiver reasons, key-files empty-hash note, local triage command, ZAP variant names, nits); all fixed, waiver rewording approved by the user. Round 2: 2 wording fixes. Round 3: clean (2026-10-18).
 15. ☐ **Moved to the end of phase 8 (2026-10-18):** a required check now would block every PR while 8 findings stay red. **Branch protection (you):** make `triage` a required status check on `main`.
 
 ## Open questions
 
-- Phase 6 in the roadmap still shows ▶ although PR #5 is merged. Did its first CI run pass (zap job green, artifact complete)? If yes, mark it ✅.
+- ~~Phase 6 still ▶ in the roadmap~~ — answered 2026-10-18: the PR #5 merge run (38422003321) passed, zap job included; phase 6 marked ✅.
