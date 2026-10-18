@@ -13,8 +13,24 @@ docker run --rm -v "$PWD:/src" aquasec/trivy:<ver> fs --scanners vuln --format j
 docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep:<ver> semgrep scan --config p/default --sarif -o reports/semgrep.sarif app
 mkdir -p reports/checkov
 docker run --rm --network none --user "$(id -u):$(id -g)" -v "$PWD:/src:ro" -v "$PWD/reports/checkov:/out" bridgecrew/checkov:<ver> -d /src --config-file /src/.checkov.yaml --soft-fail -o cli -o json -o sarif --output-file-path console,/out/results_json.json,/out/results_sarif.sarif
-python3 triage/triage.py reports/ --policy triage/waivers.yaml
 ```
+
+## Triage (phase 7) runs on the CI artifacts
+
+Triage can't run on the local scans above: they aren't what CI writes (the local gitleaks report is SARIF or redacted, and triage needs the hashed JSON). Run it on a CI run's artifacts instead. This needs a `gh` login with `actions:read`.
+
+```bash
+RUN=<run-id>   # a security.yml run: gh run list --workflow security.yml
+rm -rf reports/ci reports/ci-run   # start empty: a leftover file from an older run would hide a missing artifact
+gh run download "$RUN" --dir reports/ci -n gitleaks-report -n trivy-reports -n semgrep-reports -n checkov-reports -n zap-report
+mkdir -p reports/ci-run/checkov reports/ci-run/zap
+cp reports/ci/gitleaks-report/gitleaks.json reports/ci/trivy-reports/trivy-image.json reports/ci/trivy-reports/trivy-fs.json reports/ci/semgrep-reports/semgrep.json reports/ci-run/
+cp reports/ci/checkov-reports/results_json.json reports/ci-run/checkov/
+cp reports/ci/zap-report/zap.json reports/ci-run/zap/
+python3 triage/triage.py reports/ci-run --waivers triage/waivers.yaml --zap-rules .zap/rules.tsv --app app/   # add --kev-file PATH --offline to skip the KEV download
+```
+
+If a scan job failed, its artifact is missing (the download names it), `cp` reports it, and triage exits 2 naming the missing file. This holds only because the block starts by clearing both directories. The `cp` lines are the same in any shell. The ZAP block below is bash (it uses `${PIPESTATUS[0]}`); in zsh use `$pipestatus[1]`, or just read the Gate headline in the triage output.
 
 ZAP baseline (phase 6) runs on its own network, with the pinned add-on. Stop the `juice` container from the block above first, since both use the name `juice`:
 

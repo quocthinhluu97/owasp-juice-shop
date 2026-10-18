@@ -1,0 +1,681 @@
+{
+  "version": "1.179.0",
+  "results": [
+    {
+      "check_id": "package_managers.npm.npm-missing-minimum-release-age.npm-missing-minimum-release-age",
+      "path": "app/.npmrc",
+      "start": {
+        "line": 1,
+        "col": 1,
+        "offset": 0
+      },
+      "end": {
+        "line": 3,
+        "col": 19,
+        "offset": 142
+      },
+      "extra": {
+        "message": "This .npmrc does not set a minimum release age or sets it too low. Newly published packages can be malicious or unstable. Add `min-release-age = 7` to wait 7 days before resolving newly published package versions. Added in: v11.10 Reference: https://github.blog/changelog/2026-02-18-npm-bulk-trusted-publishing-config-and-script-security-now-generally-available/",
+        "metadata": {
+          "category": "security",
+          "technology": [
+            "npm",
+            "javascript"
+          ],
+          "cwe": [
+            "CWE-829: Inclusion of Functionality from Untrusted Control Sphere"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures"
+          ],
+          "confidence": "HIGH",
+          "likelihood": "LOW",
+          "impact": "HIGH",
+          "subcategory": [
+            "audit"
+          ],
+          "vulnerability_class": [
+            "Insecure Configuration"
+          ],
+          "references": [
+            "https://github.blog/changelog/2026-02-18-npm-bulk-trusted-publishing-config-and-script-security-now-generally-available/",
+            "https://github.com/npm/cli/pull/8965"
+          ],
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "source": "https://semgrep.dev/r/package_managers.npm.npm-missing-minimum-release-age.npm-missing-minimum-release-age",
+          "shortlink": "https://sg.run/GRo1z"
+        },
+        "severity": "MEDIUM",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "generic.secrets.security.detected-generic-secret.detected-generic-secret",
+      "path": "app/data/static/users.yml",
+      "start": {
+        "line": 151,
+        "col": 7,
+        "offset": 3523
+      },
+      "end": {
+        "line": 151,
+        "col": 47,
+        "offset": 3563
+      },
+      "extra": {
+        "message": "Generic Secret detected",
+        "metadata": {
+          "cwe": [
+            "CWE-798: Use of Hard-coded Credentials"
+          ],
+          "source-rule-url": "https://github.com/dxa4481/truffleHogRegexes/blob/master/truffleHogRegexes/regexes.json",
+          "category": "security",
+          "technology": [
+            "secrets"
+          ],
+          "confidence": "LOW",
+          "owasp": [
+            "A07:2021 - Identification and Authentication Failures",
+            "A07:2025 - Authentication Failures"
+          ],
+          "references": [
+            "https://owasp.org/Top10/A07_2021-Identification_and_Authentication_Failures"
+          ],
+          "cwe2022-top25": true,
+          "cwe2021-top25": true,
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Hard-coded Secrets"
+          ],
+          "source": "https://semgrep.dev/r/generic.secrets.security.detected-generic-secret.detected-generic-secret",
+          "shortlink": "https://sg.run/l2o5"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "package_managers.npm.npm-missing-minimum-release-age.npm-missing-minimum-release-age",
+      "path": "app/frontend/.npmrc",
+      "start": {
+        "line": 1,
+        "col": 1,
+        "offset": 0
+      },
+      "end": {
+        "line": 3,
+        "col": 19,
+        "offset": 142
+      },
+      "extra": {
+        "message": "This .npmrc does not set a minimum release age or sets it too low. Newly published packages can be malicious or unstable. Add `min-release-age = 7` to wait 7 days before resolving newly published package versions. Added in: v11.10 Reference: https://github.blog/changelog/2026-02-18-npm-bulk-trusted-publishing-config-and-script-security-now-generally-available/",
+        "metadata": {
+          "category": "security",
+          "technology": [
+            "npm",
+            "javascript"
+          ],
+          "cwe": [
+            "CWE-829: Inclusion of Functionality from Untrusted Control Sphere"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures"
+          ],
+          "confidence": "HIGH",
+          "likelihood": "LOW",
+          "impact": "HIGH",
+          "subcategory": [
+            "audit"
+          ],
+          "vulnerability_class": [
+            "Insecure Configuration"
+          ],
+          "references": [
+            "https://github.blog/changelog/2026-02-18-npm-bulk-trusted-publishing-config-and-script-security-now-generally-available/",
+            "https://github.com/npm/cli/pull/8965"
+          ],
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "source": "https://semgrep.dev/r/package_managers.npm.npm-missing-minimum-release-age.npm-missing-minimum-release-age",
+          "shortlink": "https://sg.run/GRo1z"
+        },
+        "severity": "MEDIUM",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop",
+      "path": "app/frontend/src/hacking-instructor/helpers/helpers.ts",
+      "start": {
+        "line": 49,
+        "col": 9,
+        "offset": 1387
+      },
+      "end": {
+        "line": 49,
+        "col": 54,
+        "offset": 1432
+      },
+      "extra": {
+        "message": "Possibility of prototype polluting function detected. By adding or modifying attributes of an object prototype, it is possible to create attributes that exist on every object, or replace critical attributes with malicious ones. This can be problematic if the software depends on existence or non-existence of certain attributes, or uses pre-defined attributes of object prototype (such as hasOwnProperty, toString or valueOf). Possible mitigations might be: freezing the object prototype, using an object without prototypes (via Object.create(null) ), blocking modifications of attributes that resolve to object prototype, using Map instead of object.",
+        "metadata": {
+          "cwe": [
+            "CWE-915: Improperly Controlled Modification of Dynamically-Determined Object Attributes"
+          ],
+          "category": "security",
+          "references": [
+            "https://github.com/HoLyVieR/prototype-pollution-nsec18/blob/master/paper/JavaScript_prototype_pollution_attack_in_NodeJS.pdf"
+          ],
+          "technology": [
+            "typescript"
+          ],
+          "owasp": [
+            "A08:2021 - Software and Data Integrity Failures",
+            "A08:2025 - Software or Data Integrity Failures"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "LOW",
+          "confidence": "LOW",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Mass Assignment"
+          ],
+          "source": "https://semgrep.dev/r/javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop",
+          "shortlink": "https://sg.run/w1DB"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address",
+      "path": "app/infrastructure/terraform/networking.tf",
+      "start": {
+        "line": 18,
+        "col": 1,
+        "offset": 375
+      },
+      "end": {
+        "line": 30,
+        "col": 2,
+        "offset": 843
+      },
+      "extra": {
+        "message": "Resources in the AWS subnet are assigned a public IP address. Resources should not be exposed on the public internet, but should have access limited to consumers required for the function of your application. Set `map_public_ip_on_launch` to false so that resources are not publicly-accessible.",
+        "metadata": {
+          "category": "security",
+          "technology": [
+            "terraform",
+            "aws"
+          ],
+          "owasp": [
+            "A01:2021 - Broken Access Control",
+            "A01:2025 - Broken Access Control"
+          ],
+          "cwe": [
+            "CWE-1220: Insufficient Granularity of Access Control"
+          ],
+          "references": [
+            "https://owasp.org/Top10/A01_2021-Broken_Access_Control/",
+            "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet#map_public_ip_on_launch",
+            "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html#concepts-public-addresses"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "MEDIUM",
+          "confidence": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address",
+          "shortlink": "https://sg.run/XJZw"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "javascript.express.security.audit.remote-property-injection.remote-property-injection",
+      "path": "app/routes/currentUser.ts",
+      "start": {
+        "line": 31,
+        "col": 15,
+        "offset": 1260
+      },
+      "end": {
+        "line": 31,
+        "col": 76,
+        "offset": 1321
+      },
+      "extra": {
+        "message": "Bracket object notation with user input is present, this might allow an attacker to access all properties of the object and even it's prototype. Use literal values for object properties.",
+        "metadata": {
+          "confidence": "LOW",
+          "owasp": [
+            "A02:2017 - Broken Authentication",
+            "A04:2021 - Insecure Design",
+            "A06:2025 - Insecure Design"
+          ],
+          "cwe": [
+            "CWE-522: Insufficiently Protected Credentials"
+          ],
+          "category": "security",
+          "technology": [
+            "express"
+          ],
+          "references": [
+            "https://github.com/nodesecurity/eslint-plugin-security/blob/3c7522ca1be800353513282867a1034c795d9eb4/docs/the-dangers-of-square-bracket-notation.md"
+          ],
+          "cwe2021-top25": true,
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Cryptographic Issues"
+          ],
+          "source": "https://semgrep.dev/r/javascript.express.security.audit.remote-property-injection.remote-property-injection",
+          "shortlink": "https://sg.run/Z4gn"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection",
+      "path": "app/routes/login.ts",
+      "start": {
+        "line": 34,
+        "col": 28,
+        "offset": 1488
+      },
+      "end": {
+        "line": 34,
+        "col": 169,
+        "offset": 1629
+      },
+      "extra": {
+        "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+        "metadata": {
+          "interfile": true,
+          "references": [
+            "https://sequelize.org/docs/v6/core-concepts/raw-queries/#replacements"
+          ],
+          "category": "security",
+          "technology": [
+            "express"
+          ],
+          "cwe": [
+            "CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"
+          ],
+          "owasp": [
+            "A01:2017 - Injection",
+            "A03:2021 - Injection",
+            "A05:2025 - Injection"
+          ],
+          "cwe2022-top25": true,
+          "cwe2021-top25": true,
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "HIGH",
+          "impact": "HIGH",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "SQL Injection"
+          ],
+          "source": "https://semgrep.dev/r/javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection",
+          "shortlink": "https://sg.run/gjoe"
+        },
+        "severity": "ERROR",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "javascript.express.security.audit.express-open-redirect.express-open-redirect",
+      "path": "app/routes/redirect.ts",
+      "start": {
+        "line": 18,
+        "col": 20,
+        "offset": 1007
+      },
+      "end": {
+        "line": 18,
+        "col": 25,
+        "offset": 1012
+      },
+      "extra": {
+        "message": "The application redirects to a URL specified by user-supplied input `query` that is not validated. This could redirect users to malicious locations. Consider using an allow-list approach to validate URLs, or warn users they are being redirected to a third-party website.",
+        "metadata": {
+          "technology": [
+            "express"
+          ],
+          "references": [
+            "https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html"
+          ],
+          "cwe": [
+            "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')"
+          ],
+          "category": "security",
+          "owasp": [
+            "A01:2021 - Broken Access Control",
+            "A01:2025 - Broken Access Control"
+          ],
+          "subcategory": [
+            "vuln"
+          ],
+          "likelihood": "HIGH",
+          "impact": "MEDIUM",
+          "confidence": "HIGH",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Open Redirect"
+          ],
+          "source": "https://semgrep.dev/r/javascript.express.security.audit.express-open-redirect.express-open-redirect",
+          "shortlink": "https://sg.run/EpoP"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring",
+      "path": "app/server.ts",
+      "start": {
+        "line": 157,
+        "col": 21,
+        "offset": 7638
+      },
+      "end": {
+        "line": 157,
+        "col": 63,
+        "offset": 7680
+      },
+      "extra": {
+        "message": "Detected string concatenation with a non-literal variable in a util.format / console.log function. If an attacker injects a format specifier in the string, it will forge the log message. Try to use constant values for the format string.",
+        "metadata": {
+          "cwe": [
+            "CWE-134: Use of Externally-Controlled Format String"
+          ],
+          "owasp": [
+            "A01:2021 - Broken Access Control",
+            "A01:2025 - Broken Access Control"
+          ],
+          "category": "security",
+          "technology": [
+            "javascript"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "MEDIUM",
+          "impact": "LOW",
+          "confidence": "LOW",
+          "references": [
+            "https://cwe.mitre.org/data/definitions/134.html"
+          ],
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Improper Validation"
+          ],
+          "source": "https://semgrep.dev/r/javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring",
+          "shortlink": "https://sg.run/7Y5R"
+        },
+        "severity": "INFO",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    },
+    {
+      "check_id": "terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address",
+      "path": "app/terraform/networking.tf",
+      "start": {
+        "line": 18,
+        "col": 1,
+        "offset": 375
+      },
+      "end": {
+        "line": 30,
+        "col": 2,
+        "offset": 843
+      },
+      "extra": {
+        "message": "Resources in the AWS subnet are assigned a public IP address. Resources should not be exposed on the public internet, but should have access limited to consumers required for the function of your application. Set `map_public_ip_on_launch` to false so that resources are not publicly-accessible.",
+        "metadata": {
+          "category": "security",
+          "technology": [
+            "terraform",
+            "aws"
+          ],
+          "owasp": [
+            "A01:2021 - Broken Access Control",
+            "A01:2025 - Broken Access Control"
+          ],
+          "cwe": [
+            "CWE-1220: Insufficient Granularity of Access Control"
+          ],
+          "references": [
+            "https://owasp.org/Top10/A01_2021-Broken_Access_Control/",
+            "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/subnet#map_public_ip_on_launch",
+            "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html#concepts-public-addresses"
+          ],
+          "subcategory": [
+            "audit"
+          ],
+          "likelihood": "LOW",
+          "impact": "MEDIUM",
+          "confidence": "MEDIUM",
+          "license": "Semgrep Rules License v1.0. For more details, visit semgrep.dev/legal/rules-license",
+          "vulnerability_class": [
+            "Other"
+          ],
+          "source": "https://semgrep.dev/r/terraform.aws.security.aws-subnet-has-public-ip-address.aws-subnet-has-public-ip-address",
+          "shortlink": "https://sg.run/XJZw"
+        },
+        "severity": "WARNING",
+        "fingerprint": "requires login",
+        "lines": "requires login",
+        "validation_state": "NO_VALIDATOR",
+        "engine_kind": "OSS"
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 3,
+      "level": "warn",
+      "type": [
+        "PartialParsing",
+        [
+          {
+            "path": "app/frontend/src/app/deluxe-user/deluxe-user.component.html",
+            "start": {
+              "line": 6,
+              "col": 1,
+              "offset": 0
+            },
+            "end": {
+              "line": 6,
+              "col": 14,
+              "offset": 13
+            }
+          },
+          {
+            "path": "app/frontend/src/app/deluxe-user/deluxe-user.component.html",
+            "start": {
+              "line": 10,
+              "col": 1,
+              "offset": 0
+            },
+            "end": {
+              "line": 10,
+              "col": 2,
+              "offset": 1
+            }
+          }
+        ]
+      ],
+      "message": "Syntax error at line app/frontend/src/app/deluxe-user/deluxe-user.component.html:6:\n `@if (error) {` was unexpected",
+      "path": "app/frontend/src/app/deluxe-user/deluxe-user.component.html",
+      "spans": [
+        {
+          "file": "app/frontend/src/app/deluxe-user/deluxe-user.component.html",
+          "start": {
+            "line": 6,
+            "col": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 6,
+            "col": 14,
+            "offset": 13
+          }
+        },
+        {
+          "file": "app/frontend/src/app/deluxe-user/deluxe-user.component.html",
+          "start": {
+            "line": 10,
+            "col": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 10,
+            "col": 2,
+            "offset": 1
+          }
+        }
+      ]
+    }
+  ],
+  "paths": {
+    "scanned": [
+      "app/.npmrc",
+      "app/data/static/users.yml",
+      "app/frontend/.npmrc",
+      "app/frontend/src/hacking-instructor/helpers/helpers.ts",
+      "app/infrastructure/terraform/networking.tf",
+      "app/routes/currentUser.ts",
+      "app/routes/login.ts",
+      "app/routes/redirect.ts",
+      "app/server.ts",
+      "app/terraform/networking.tf"
+    ]
+  },
+  "time": {
+    "rules": [],
+    "rules_parse_time": 0.6881978511810303,
+    "profiling_times": {
+      "config_time": 1.6556639671325684,
+      "core_time": 28.076107501983643,
+      "ignores_time": 0.0018990039825439453,
+      "total_time": 29.742120504379272
+    },
+    "parsing_time": {
+      "total_time": 0.0,
+      "per_file_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.0,
+        "count_ratio": 0.0
+      },
+      "very_slow_files": []
+    },
+    "scanning_time": {
+      "total_time": 49.08665132522583,
+      "per_file_time": {
+        "mean": 0.02565951454533499,
+        "std_dev": 0.008836018099145124
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.05124979929264945,
+        "count_ratio": 0.0005227391531625719
+      },
+      "very_slow_files": [
+        {
+          "fpath": "app/server.ts",
+          "ftime": 2.515681028366089
+        }
+      ]
+    },
+    "matching_time": {
+      "total_time": 0.0,
+      "per_file_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.0,
+        "count_ratio": 0.0
+      },
+      "very_slow_rules_on_files": []
+    },
+    "tainting_time": {
+      "total_time": 0.0,
+      "per_def_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.0,
+        "count_ratio": 0.0
+      },
+      "very_slow_rules_on_defs": []
+    },
+    "fixpoint_timeouts": [],
+    "prefiltering": {
+      "project_level_time": 0.0,
+      "file_level_time": 0.0,
+      "rules_with_project_prefilters_ratio": 0.0,
+      "rules_with_file_prefilters_ratio": 0.9746662621359223,
+      "rules_selected_ratio": 0.04598814413741598,
+      "rules_matched_ratio": 0.04598814413741598
+    },
+    "targets": [],
+    "total_bytes": 0,
+    "max_memory_bytes": 1138705664
+  },
+  "engine_requested": "OSS",
+  "skipped_rules": [],
+  "profiling_results": []
+}

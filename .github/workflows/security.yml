@@ -1,7 +1,8 @@
-# Build the Juice Shop image and run the security scanners.
+# Build the Juice Shop image, run the security scanners, then decide pass/fail.
 # Phase 1: build. Phase 2: gitleaks. Phase 3: trivy. Phase 4: semgrep. Phase 5: checkov. Phase 6: zap.
-# Scan jobs never fail on findings: they upload their report as an artifact, and triage (phase 7)
-# is the only job that decides pass/fail.
+# Phase 7: triage. Scan jobs never fail on findings: they upload their report as an artifact.
+# The triage job runs after all five scans and reads their artifacts; it is the only job that
+# decides pass/fail (gating-policy.md, D17 in .claude/plans/phase-7-triage.md).
 #
 # Deliberately not hardened yet (phase 9, .claude/rules/ci-workflows.md): actions use version tags
 # (not commit SHAs), checkout keeps its credentials, and there is no concurrency group. Phase 5
@@ -596,4 +597,121 @@ jobs:
           name: zap-report-incomplete
           path: reports/zap/
           if-no-files-found: ignore
+          retention-days: 7
+
+  # The only job that decides pass/fail (gating-policy.md). It runs after every scan job, and
+  # `!cancelled()` rather than `always()`: a needed job that failed would otherwise skip this one,
+  # and a cancelled run should stop. A scan job that failed leaves its artifact missing; triage then
+  # exits 2 and names the missing file, so a missing report never reads as "no findings" (D17).
+  triage:
+    needs: [gitleaks, trivy, semgrep, checkov, zap]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # Installed and tested before anything else runs: a broken triage fails here, with its own message.
+      - name: Install triage dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install -r triage/requirements.txt
+
+      - name: Run triage tests
+        run: |
+          set -euo pipefail
+          python -m pytest triage/tests -q
+
+      # Each artifact goes into the directory triage.py reads from (see report_paths() in
+      # triage/triage.py). upload-artifact strips the common parent directory, so the files sit at
+      # the top of each artifact. continue-on-error: a scan job that failed uploads nothing; this
+      # step fails, the job goes on, and triage reports the missing file (exit 2).
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: gitleaks-report
+          path: reports
+
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: trivy-reports
+          path: reports
+
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: semgrep-reports
+          path: reports
+
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: checkov-reports
+          path: reports/checkov
+
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: zap-report
+          path: reports/zap
+
+      # KEV cache (D9): triage/.cache holds kev.json and its fetched_at sidecar (kev.json.meta).
+      # The restore key is never saved, so restore-keys: kev- always restores the newest entry (the
+      # trivy job's trick). Freshness is judged by fetched_at inside the cache, not by file mtime or
+      # by the run date. triage reuses a cache up to 7 days old with a warning when the download fails.
+      - name: Restore KEV cache
+        id: kev-restore
+        uses: actions/cache/restore@v6
+        with:
+          path: triage/.cache
+          key: kev-restore # never saved under this name; restore-keys picks the newest entry
+          restore-keys: kev-
+
+      # Exit code is the job result: 0 pass, 1 gate failed, 2 script error. Not masked: a failure
+      # here must fail the build. The script writes the step summary itself ($GITHUB_STEP_SUMMARY).
+      - name: Run triage
+        run: |
+          set -euo pipefail
+          python triage/triage.py reports --waivers triage/waivers.yaml --zap-rules .zap/rules.tsv --app app/
+
+      # The save key is the day the feed was actually fetched (fetched_at in the sidecar), not the
+      # day of this run. So one entry is saved per real fetch, and a stale fallback is never saved
+      # under a new key: its fetched_at is the old one, so its key matches the restored entry.
+      # Empty output (no sidecar or no cache file, e.g. offline with nothing cached): nothing is saved.
+      - name: KEV cache save key
+        id: kev-save-key
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          meta=triage/.cache/kev.json.meta
+          if [ -f "$meta" ] && [ -f triage/.cache/kev.json ]; then
+            d=$(jq -r '.fetched_at[0:10]' "$meta" 2>/dev/null || true)
+            if [[ "$d" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+              echo "key=kev-$d" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      # Saved after triage, even when it gated (!cancelled()). Only when the fetch day's key differs
+      # from the entry that was restored (no save when the cache was reused as it was).
+      - name: Save KEV cache
+        if: ${{ !cancelled() && steps.kev-save-key.outputs.key != '' && steps.kev-save-key.outputs.key != steps.kev-restore.outputs.cache-matched-key }}
+        uses: actions/cache/save@v6
+        with:
+          path: triage/.cache
+          key: ${{ steps.kev-save-key.outputs.key }}
+
+      # Uploaded even when triage gated or errored, so the reason is in the artifact too.
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: triage-report
+          path: reports/triage.json
+          if-no-files-found: warn # an exit-2 run writes no triage.json
           retention-days: 7
