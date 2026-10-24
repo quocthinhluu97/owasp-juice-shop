@@ -58,11 +58,12 @@ Both `.npmrc` files need the change: `.dockerignore` excludes only the root `.np
 `frontend/.npmrc` is copied into the build and would otherwise make the frontend install ignore its
 lockfile.
 
-Side effects: builds are reproducible, and Trivy's `fs` scan can read exact dependency versions.
-**Caveat (phase 3):** not fully. 11 production package versions in the image differ from the
-lockfile, likely changed by the Dockerfile's `npm dedupe`; see `docs/findings/trivy.md`.
-(That count is against the phase 3 lockfile. The lockfile was refreshed in phase 8 F1, below;
-the drift itself is fixed in phase 8 F2.)
+Side effects: the npm packages in the image are reproducible (`npm ci`, phase 8 F2, below), and
+Trivy's `fs` scan can read exact dependency versions. Base images still float until phase 8 F3.
+**Caveat (phase 3), fixed in phase 8 F2:** until then, 11 production package versions in the image
+differed from the lockfile, likely changed by the Dockerfile's `npm dedupe`; see
+`docs/findings/trivy.md`. Checked 2026-10-24: the image's npm packages now match the lockfile.
+(That count is against the phase 3 lockfile. The lockfile was refreshed in phase 8 F1, below.)
 Dependencies stay at their 2026-08 versions until deliberately updated (a phase 8 candidate).
 
 ### Changed: lockfile refresh (phase 8, F1)
@@ -81,3 +82,20 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
 - Why: the committed lockfile was stale. The image had drifted off it, and `npm ci` (F2) without
   this refresh would have shipped the vulnerable versions. These packages are in the image and
   reachable (`compression`, `proxy-addr`, `handlebars`), so the refresh fixes them directly.
+
+### Changed: npm ci instead of npm install + dedupe (phase 8, F2)
+
+- `app/Dockerfile`, installer stage: `RUN npm install --omit=dev` and `RUN npm dedupe --omit=dev`
+  replaced by `RUN npm ci --omit=dev`. `npm dedupe` re-resolves duplicated packages from the
+  registry, which undoes the lockfile.
+- `app/package.json`, `postinstall`: `cd frontend && npm install` changed to `cd frontend && npm ci`.
+  Exact strings:
+
+  ```
+  before: "postinstall": "cd frontend && npm install && cd .. && npm run build:frontend && (npm run --silent build:server || cd .)"
+  after:  "postinstall": "cd frontend && npm ci && cd .. && npm run build:frontend && (npm run --silent build:server || cd .)"
+  ```
+
+- Why: `npm ci` installs exactly what the lockfile says and fails on a `package.json` mismatch,
+  instead of rewriting the lock. The frontend lockfile is enforced too, not just the root one.
+- Proof and the drift it fixed: `docs/findings/trivy.md` ("Fixed in phase 8", F2).

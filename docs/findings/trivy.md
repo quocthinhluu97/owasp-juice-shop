@@ -101,7 +101,7 @@ Why it matters:
 `app/VENDORED.md` still says "builds are reproducible"; it now points here.
 
 **Phase 8 candidate:** `npm ci --omit=dev` instead of `npm install` + `npm dedupe`, then confirm
-that the image lockfile equals the repo lockfile.
+that the image lockfile equals the repo lockfile. Done in phase 8 F2 (see below).
 
 ## Real versus noise
 
@@ -170,7 +170,7 @@ well: grep-level evidence is a reason to deprioritise, not to suppress.
 ## Phase 8 candidates
 
 1. **Reproducible install:** `npm ci --omit=dev` instead of `npm install` + `npm dedupe` (finding
-   above).
+   above). Done in phase 8 F2 (see below).
 2. **Dependency bump:** none of the top packages is a simple same-major bump: `multer` needs
    1 → 2, and `undici` and `tar` need parent upgrades. Before picking one, list the High/Critical
    findings whose fix is on the *installed* major line. Those are the cheap bumps.
@@ -249,3 +249,52 @@ CI reports (run 38422003321):
    dependency). They gate rule 3; the decision is pending. It also reported build-stage-only
    `vite` 8.1.5, `@modelcontextprotocol/sdk` 1.29.0 and `hono` 4.13.1 (reported, not gated).
    Scan results move even when the code doesn't.
+
+### F2: install exactly what the lockfile says (2026-10-24)
+
+**Finding.** After F1, the image still didn't follow the committed lockfile (the drift section
+above). Compared with `app/package-lock.json`, 14 root packages drifted:
+
+- **12 at a different version.** Three moved down: `mime-db` 1.54.0 → 1.52.0, `core-util-is` 1.0.3
+  → 1.0.2, `lowercase-keys` 1.0.1 → 1.0.0. Nine moved up: `moment` 2.30.1 → 2.31.0,
+  `sqlite3/…/http-cache-semantics` 4.2.0 → 4.3.0, `@types/node`, `undici-types`, `ansi-regex`,
+  `is-core-module`, `@noble/hashes`, `pug-filters/…/resolve`, and `readable-web-to-node-stream/…/readable-stream`.
+- **2 lock entries merged away:** `cacheable-request/…/lowercase-keys` and `mime-types/…/mime-db`.
+
+**Why it mattered.** The build wasn't reproducible, and the lockfile scan and the image disagreed.
+F1 showed the disagreement goes both ways: the fs scan can miss a finding the image has, or report
+one the image doesn't.
+
+**Fix.** Two changes, in `app/Dockerfile` and `app/package.json`:
+
+- Installer stage: `RUN npm install --omit=dev` and `RUN npm dedupe --omit=dev` become
+  `RUN npm ci --omit=dev`. `npm dedupe` is dropped because it re-resolves every duplicated package
+  from the registry, which undoes the lock (npm's arborist source, read during research).
+- Upstream postinstall: `cd frontend && npm install` becomes `cd frontend && npm ci` (phase 8 plan,
+  D5). The frontend lockfile is now enforced too: `npm ci` fails on a lock/`package.json` mismatch
+  instead of silently rewriting the lock.
+
+**Proof.** The image was built with the F1 lockfile and the new Dockerfile, then scanned with Trivy
+0.75.0 (`reports/phase8-f2/`). A stdlib script compared the npm packages in the image under
+`juice-shop/node_modules` (Trivy `FilePath`) with the lockfile's non-dev entries:
+
+- before (old Dockerfile): 687 compared, 12 mismatched, 2 missing;
+- after: 689 compared, 0 mismatched, 0 missing, 0 extra. The image's npm packages are identical to
+  the lockfile.
+
+**Consequence (the lesson).** Matching the lockfile made the image scan worse by 2 rows (140 → 142),
+because the drift had been hiding two findings:
+
+- `moment` 2.30.1: CVE-2026-17495 (Medium, fix 2.31.0), via `sequelize` and `finale-rest`.
+- `http-cache-semantics` 4.2.0, nested under `sqlite3`: CVE-2026-93748 (High). Trivy lists no fix,
+  and 4.3.0 wasn't flagged in the old image, because the advisory has no fixed-version field.
+
+Neither gates. Medium isn't a gating class, and rule 3 only gates a High with a fix listed. The
+triage dry run is unchanged at 3 blocking. Both could be refreshed in range like F1
+(`npm update moment http-cache-semantics --package-lock-only`). That refresh is a separate
+follow-up commit (F2b below), so this commit's proof stays tied to the image that was scanned.
+
+The "no fix listed" gap is worth remembering. Rule 3 trusts Trivy's `FixedVersion`, so a missing
+field turns a fixable High into report-only.
+
+**Also.** Upstream's `|| cd .` still hides a failed server compile. Out of scope (phase 8 plan, D15).
