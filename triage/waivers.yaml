@@ -3,6 +3,7 @@
 # expires is the last day it applies, at most 90 days after the run date; expired waivers stop applying.
 # Two expiries: 2027-01-16 (deliberate challenge material, or not reachable / fix needs a major upgrade:
 # re-judge then) and 2026-11-30 (cheap fixes deferred to phase 8: they should be fixed, not renewed).
+# Phase 8 (2026-10-24): every 2026-11-30 entry was fixed and removed, or judged and moved to 2027-01-16.
 # Drafted 2026-10-18 from triage run on CI run 38422003321; reviewed by the owner before commit.
 #
 # Selector: fingerprint, or cve: CVE-YYYY-NNNN + package. Fields: reason, owner (GitHub handle), expires (YYYY-MM-DD).
@@ -44,9 +45,17 @@ waivers:
 
   # --- rule 3 ---
   - fingerprint: "vuln:CVE-2026-101896:@angular/router:22.1.1"   # CVE-2026-101896 @angular/router@22.1.1
-    reason: "Ships in the browser bundle (direct frontend dependency); fix 22.2.0 is a minor bump of the Angular set. Deferred to phase 8 (short expiry)."
+    reason: "Ships in the browser bundle (direct frontend dependency). The fix needs the whole Angular set at 22.2.x (exact @angular/core peer pin), and @angular/build 22.2 writes browser-stats.json instead of stats.json, which breaks the frontend sbom script (the phase 1 break). Judged in phase 8 (D13): not worth a sixth fix there; re-judge at expiry."
     owner: quocthinhluu97
-    expires: 2026-11-30
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-111751:@angular/router:22.1.1"   # CVE-2026-111751 @angular/router@22.1.1
+    reason: "Same as CVE-2026-101896 (fix 22.2.1): Ships in the browser bundle (direct frontend dependency). The fix needs the whole Angular set at 22.2.x (exact @angular/core peer pin), and @angular/build 22.2 writes browser-stats.json instead of stats.json, which breaks the frontend sbom script (the phase 1 break). Judged in phase 8 (D13): not worth a sixth fix there; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-111752:@angular/router:22.1.1"   # CVE-2026-111752 @angular/router@22.1.1
+    reason: "Same as CVE-2026-101896 (fix 22.2.1): Ships in the browser bundle (direct frontend dependency). The fix needs the whole Angular set at 22.2.x (exact @angular/core peer pin), and @angular/build 22.2 writes browser-stats.json instead of stats.json, which breaks the frontend sbom script (the phase 1 break). Judged in phase 8 (D13): not worth a sixth fix there; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
   - fingerprint: "vuln:CVE-2026-19481:@fastify/busboy:2.1.1"   # CVE-2026-19481 @fastify/busboy@2.1.1
     reason: "Pulled in only by undici 5.29.0 (via @ai-sdk/provider-utils, used by routes/chat.ts), which requires @fastify/busboy ^2.0.0; the fix 3.2.1 is a major, so it needs an undici upgrade or an override. Whether newer undici still uses busboy is not checked."
     owner: quocthinhluu97
@@ -55,10 +64,6 @@ waivers:
     reason: "Pulled in only via jwa 0.0.1 / jws 0.2.6 under the deliberate jsonwebtoken pins (JWT challenges); fixed only by bumping those."
     owner: quocthinhluu97
     expires: 2027-01-16
-  - fingerprint: "vuln:CVE-2026-87776:compression:1.8.1"   # CVE-2026-87776 compression@1.8.1
-    reason: "Reachable (direct, server.ts); the 1.8.2 patch is inside the ^1.8.1 range, so a lockfile refresh fixes it. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
   - fingerprint: "vuln:CVE-2023-46233:crypto-js:3.3.0"   # CVE-2023-46233 crypto-js@3.3.0
     reason: "Via pdfkit 0.11.0: crypto-js runs (MD5 file ID) but neither vulnerable function does; PBKDF2 is never called and WordArray.random only for password-protected PDFs, which routes/order.ts never makes (docs/findings/trivy.md)."
     owner: quocthinhluu97
@@ -75,14 +80,6 @@ waivers:
     reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
     owner: quocthinhluu97
     expires: 2027-01-16
-  - fingerprint: "vuln:CVE-2026-106445:handlebars:4.7.9"   # CVE-2026-106445 handlebars@4.7.9
-    reason: "Reachable (hbs view engine, server.ts:164); hbs 4.2.1 pins handlebars exactly at 4.7.9, so the 4.7.10 patch needs an npm override or a newer hbs. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
-  - fingerprint: "vuln:CVE-2026-106446:handlebars:4.7.9"   # CVE-2026-106446 handlebars@4.7.9
-    reason: "Reachable (hbs view engine, server.ts:164); hbs 4.2.1 pins handlebars exactly at 4.7.9, so the 4.7.10 patch needs an npm override or a newer hbs. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
   - fingerprint: "vuln:CVE-2022-25881:http-cache-semantics:3.8.1"   # CVE-2022-25881 http-cache-semantics@3.8.1
     reason: "Via cacheable-request <- got 8 <- download, used at startup to fetch configured image URLs; the ReDoS needs a hostile Cache-Control header from a server we chose."
     owner: quocthinhluu97
@@ -144,11 +141,11 @@ waivers:
     owner: quocthinhluu97
     expires: 2027-01-16
   - fingerprint: "vuln:CVE-2017-18214:moment:2.0.0"   # CVE-2017-18214 moment@2.0.0
-    reason: "moment 2.0.0 comes only from the deliberate jsonwebtoken 0.1.0 pin (JWT challenges); the app's own moment is 2.30.1. Fixed only by bumping that pin."
+    reason: "moment 2.0.0 comes only from the deliberate jsonwebtoken 0.1.0 pin (JWT challenges); the app's own moment is 2.31.0. Fixed only by bumping that pin."
     owner: quocthinhluu97
     expires: 2027-01-16
   - fingerprint: "vuln:CVE-2022-24785:moment:2.0.0"   # CVE-2022-24785 moment@2.0.0
-    reason: "moment 2.0.0 comes only from the deliberate jsonwebtoken 0.1.0 pin (JWT challenges); the app's own moment is 2.30.1. Fixed only by bumping that pin."
+    reason: "moment 2.0.0 comes only from the deliberate jsonwebtoken 0.1.0 pin (JWT challenges); the app's own moment is 2.31.0. Fixed only by bumping that pin."
     owner: quocthinhluu97
     expires: 2027-01-16
   - fingerprint: "vuln:CVE-2025-47935:multer:1.4.5-lts.2"   # CVE-2025-47935 multer@1.4.5-lts.2
@@ -191,10 +188,6 @@ waivers:
     reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
     owner: quocthinhluu97
     expires: 2027-01-16
-  - fingerprint: "vuln:CVE-2026-90711:proxy-addr:2.0.7"   # CVE-2026-90711 proxy-addr@2.0.7
-    reason: "Reachable (express core); 2.0.8 is inside express's ~2.0.7 range, so a lockfile refresh fixes it. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
   - fingerprint: "vuln:CVE-2022-25887:sanitize-html:1.4.2"   # CVE-2022-25887 sanitize-html@1.4.2
     reason: "Deliberately ancient direct pin used by lib/insecurity.ts for the XSS challenges (docs/findings/trivy.md); bumping breaks them."
     owner: quocthinhluu97
@@ -268,9 +261,9 @@ waivers:
     owner: quocthinhluu97
     expires: 2027-01-16
   - fingerprint: "vuln:CVE-2026-48779:ws:8.18.0"   # CVE-2026-48779 ws@8.18.0
-    reason: "Frontend only, via ethers 5 (@ethersproject/providers). Its browser build is believed to use the native WebSocket instead of ws, but this is unverified (docs/findings/trivy.md); short expiry until it is checked in phase 8."
+    reason: "Frontend lockfile only, via ethers 5 (@ethersproject/providers 5.8.0). Not in the browser bundle (verified phase 8, 2026-10-24): the build's 3rdpartylicenses.txt lists 111 packages without ws, and none of ws's own strings (handshake GUID, permessage-deflate, WebSocketServer, Sec-WebSocket-Key) appear in the built JS; ethers' browser build aliases ws to the native WebSocket. Re-check if ethers or the Angular build changes."
     owner: quocthinhluu97
-    expires: 2026-11-30
+    expires: 2027-01-16
 
   # --- rule 4 ---
   - fingerprint: "code:semgrep:javascript.express.security.audit.remote-property-injection.remote-property-injection:app/routes/currentUser.ts:31"   # javascript.express.security.audit.remote-property-injection.remote-property-injection app/routes/currentUser.ts:31

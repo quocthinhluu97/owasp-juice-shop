@@ -15,7 +15,7 @@ Status: ✅ done · ▶ in progress · ☐ not started
 | 5 | Checkov: Dockerfile and workflow misconfiguration | ✅ |
 | 6 | ZAP baseline: passive scan of the running app | ✅ |
 | 7 | Triage script: one pass/fail decision | ✅ |
-| 8 | Fix a few findings | ☐ |
+| 8 | Fix a few findings | ▶ |
 | 9 | Lock down the pipeline | ☐ |
 
 ---
@@ -161,7 +161,8 @@ Goal: one Python script decides pass or fail, using `gating-policy.md` and `tria
 
 **Expected:** the build goes red on the first run. That's the point. Read why, then go to phase 8 or add waivers with real reasons.
 
-## Phase 8: Fix a few findings ☐
+## Phase 8: Fix a few findings ▶
+Plan: [phase-8-fixes.md](phase-8-fixes.md) — approved 2026-10-24
 
 Goal: about 4 fixes that each teach something different. Each gets its own commit, a note in `docs/findings/` (finding, why it mattered, fix, proof the scanner no longer reports it), and an entry under "Local changes" in `app/VENDORED.md`.
 

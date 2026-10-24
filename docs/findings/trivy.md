@@ -101,7 +101,7 @@ Why it matters:
 `app/VENDORED.md` still says "builds are reproducible"; it now points here.
 
 **Phase 8 candidate:** `npm ci --omit=dev` instead of `npm install` + `npm dedupe`, then confirm
-that the image lockfile equals the repo lockfile.
+that the image lockfile equals the repo lockfile. Done in phase 8 F2 (see below).
 
 ## Real versus noise
 
@@ -170,7 +170,205 @@ well: grep-level evidence is a reason to deprioritise, not to suppress.
 ## Phase 8 candidates
 
 1. **Reproducible install:** `npm ci --omit=dev` instead of `npm install` + `npm dedupe` (finding
-   above).
+   above). Done in phase 8 F2 (see below).
 2. **Dependency bump:** none of the top packages is a simple same-major bump: `multer` needs
    1 → 2, and `undici` and `tar` need parent upgrades. Before picking one, list the High/Critical
    findings whose fix is on the *installed* major line. Those are the cheap bumps.
+
+## Fixed in phase 8
+
+### F1: in-range lockfile refresh (2026-10-24)
+
+**Finding.** Phase 7's triage blocked on five lockfile-only rows, all marked "presence: fs only"
+(the image already had fixed versions):
+
+- `brace-expansion` 1.1.18 and 2.1.4: CVE-2026-102276 and CVE-2026-102278 (High), 4 rows.
+- `js-yaml` 3.15.1: CVE-2026-84375 (High), 1 row.
+
+Three more were waived until 2026-11-30 as "deferred to phase 8", because they were in the image
+and reachable:
+
+- `compression` 1.8.1: CVE-2026-87776 (High), used directly in `server.ts`.
+- `proxy-addr` 2.0.7: CVE-2026-90711 (Critical), used by express core.
+- `handlebars` 4.7.9: CVE-2026-106445 and CVE-2026-106446 (Critical), used by the `hbs` view
+  engine (`server.ts:164`).
+
+**Why it mattered.** The image already shipped `brace-expansion` 1.1.21 / 2.1.7 and `js-yaml`
+3.15.2, because `npm install` plus `npm dedupe` drift off the lockfile (the drift section above).
+The lockfile was stale. Switching to `npm ci` (F2) without refreshing it first would have put the
+vulnerable versions into the image.
+
+**Fix.** Inside the pinned container `node:24.22.1-trixie@sha256:016f604a11c4c725f0a4c62e29ff11adab153d297bf97046c9bf2ddb9f1011d3`,
+root lockfile only, `package.json` unchanged:
+
+```bash
+npm update brace-expansion js-yaml compression proxy-addr hbs --package-lock-only --ignore-scripts --no-audit --no-fund
+```
+
+| Lockfile path | Before | After | Note |
+|---|---|---|---|
+| `brace-expansion` | 1.1.18 | 1.1.21 | |
+| `glob/node_modules/brace-expansion` | 2.1.4 | 2.1.7 | |
+| `@typescript-eslint/typescript-estree/node_modules/brace-expansion` | 5.0.9 | 5.0.12 | moved by `npm update` (below) |
+| `js-yaml` | 3.15.1 | 3.15.2 | |
+| `@eslint/eslintrc/node_modules/js-yaml` | 4.3.1 | 4.3.2 | moved by `npm update` (below) |
+| `xmlbuilder2/node_modules/js-yaml` | 4.3.1 | 4.3.2 | moved by `npm update` (below) |
+| `compression` | 1.8.1 | 1.8.2 | adds `destroy` 1.2.0, already in the lockfile |
+| `proxy-addr` | 2.0.7 | 2.0.8 | |
+| `hbs` | 4.2.1 | 4.4.0 | pins `handlebars` 4.7.10 |
+| `handlebars` | 4.7.9 | 4.7.10 | |
+
+- `npm update <name>` moves every copy of that name in the tree, so the extra copies of
+  `brace-expansion` 5.x and `js-yaml` 4.x moved too.
+- `hbs` 4.4.0 was 2 days old when taken. That's an accepted risk (D3). It
+  pins `handlebars` 4.7.10 exactly, so no `overrides` entry was needed.
+
+**Proof.** Local Trivy 0.75.0 on the new lockfile (`reports/phase8/`), compared with the phase 7
+CI reports (run 38422003321):
+
+- `trivy fs`: the F1 rows are gone, 12 rows across Critical/High/Medium: `brace-expansion` ×6
+  (CVE-2026-102276, -102277, -102278), `js-yaml` ×1, `compression` ×1, `handlebars` ×3
+  (CVE-2026-106444, -106445, -106446) and `proxy-addr` ×1 (the root copy). One `proxy-addr` row
+  remains; see lesson 1.
+- `trivy image`: the `compression`, `proxy-addr` and `handlebars` rows are gone (5 rows).
+  `brace-expansion` and `js-yaml` were already fixed in the image.
+- Image build OK. Smoke test HTTP 200 on `127.0.0.1:3001`, and no errors in the logs.
+- Triage dry run (phase 7 CI inputs with the new Trivy reports, `--offline`): 8 → 5 blocking.
+  The five F1 rows are gone, and two new `@angular/router` rows are blocking (lesson 2). The four
+  removed waivers match nothing now: 0 expired waivers, 0 waiver warnings.
+
+**Lessons.**
+
+1. **`proxy-addr` 2.0.7 still appears in the fs scan.** It's a second copy in the **frontend**
+   lockfile, via `@angular/cli` → `express` 5. It's build stage only (D7), so it doesn't gate.
+   The removed waiver's fingerprint (CVE + package + version) had silently covered both copies,
+   though its reason only described the backend one. A waiver can match more than its reason
+   talks about.
+2. **The newer Trivy DB added findings F1 didn't cause.** Six days after phase 7 it reported
+   `@angular/router` 22.1.1 CVE-2026-111751 and CVE-2026-111752 (High, a frontend direct
+   dependency). They gate rule 3; re-waived until 2027-01-16 (plan D13, commit 92ea4d7). It also reported build-stage-only
+   `vite` 8.1.5, `@modelcontextprotocol/sdk` 1.29.0 and `hono` 4.13.1 (reported, not gated).
+   Scan results move even when the code doesn't.
+
+### F2: install exactly what the lockfile says (2026-10-24)
+
+**Finding.** After F1, the image still didn't follow the committed lockfile (the drift section
+above). Compared with `app/package-lock.json`, 14 root packages drifted:
+
+- **12 at a different version.** Three moved down: `mime-db` 1.54.0 → 1.52.0, `core-util-is` 1.0.3
+  → 1.0.2, `lowercase-keys` 1.0.1 → 1.0.0. Nine moved up: `moment` 2.30.1 → 2.31.0,
+  `sqlite3/…/http-cache-semantics` 4.2.0 → 4.3.0, `@types/node`, `undici-types`, `ansi-regex`,
+  `is-core-module`, `@noble/hashes`, `pug-filters/…/resolve`, and `readable-web-to-node-stream/…/readable-stream`.
+- **2 lock entries merged away:** `cacheable-request/…/lowercase-keys` and `mime-types/…/mime-db`.
+
+**Why it mattered.** The build wasn't reproducible, and the lockfile scan and the image disagreed.
+F1 showed the disagreement goes both ways: the fs scan can miss a finding the image has, or report
+one the image doesn't.
+
+**Fix.** Two changes, in `app/Dockerfile` and `app/package.json`:
+
+- Installer stage: `RUN npm install --omit=dev` and `RUN npm dedupe --omit=dev` become
+  `RUN npm ci --omit=dev`. `npm dedupe` is dropped because it re-resolves every duplicated package
+  from the registry, which undoes the lock (npm's arborist source, read during research).
+- Upstream postinstall: `cd frontend && npm install` becomes `cd frontend && npm ci` (phase 8 plan,
+  D5). The frontend lockfile is now enforced too: `npm ci` fails on a lock/`package.json` mismatch
+  instead of silently rewriting the lock.
+
+**Proof.** The image was built with the F1 lockfile and the new Dockerfile, then scanned with Trivy
+0.75.0 (`reports/phase8-f2/`). A stdlib script compared the npm packages in the image under
+`juice-shop/node_modules` (Trivy `FilePath`) with the lockfile's non-dev entries:
+
+- before (old Dockerfile): 687 compared, 12 mismatched, 2 missing;
+- after: 689 compared, 0 mismatched, 0 missing, 0 extra. The image's npm packages are identical to
+  the lockfile.
+
+**Consequence (the lesson).** Matching the lockfile made the image scan worse by 2 rows (140 → 142),
+because the drift had been hiding two findings:
+
+- `moment` 2.30.1: CVE-2026-17495 (Medium, fix 2.31.0), via `sequelize` and `finale-rest`.
+- `http-cache-semantics` 4.2.0, nested under `sqlite3`: CVE-2026-93748 (High). Trivy lists no fix,
+  and 4.3.0 wasn't flagged in the old image, because the advisory has no fixed-version field.
+
+Neither gates. Medium isn't a gating class, and rule 3 only gates a High with a fix listed. The
+triage dry run is unchanged at 3 blocking. Both could be refreshed in range like F1
+(`npm update moment http-cache-semantics --package-lock-only`). That refresh is a separate
+follow-up commit (F2b below), so this commit's proof stays tied to the image that was scanned.
+
+The "no fix listed" gap is worth remembering. Rule 3 trusts Trivy's `FixedVersion`, so a missing
+field turns a fixable High into report-only.
+
+**Also.** Upstream's `|| cd .` still hides a failed server compile. Out of scope (phase 8 plan, D15).
+
+### F2b: refresh the two findings the drift had hidden (2026-10-24)
+
+**Fix.** `npm update moment http-cache-semantics --package-lock-only --ignore-scripts --no-audit
+--no-fund` in the same pinned `node:24.22.1-trixie` image as F1. Three lockfile changes, all in
+range: moment 2.30.1 → 2.31.0, `sqlite3/node_modules/http-cache-semantics` 4.2.0 → 4.3.0, and the
+dev-only `make-fetch-happen/node_modules/http-cache-semantics` 4.2.0 → 4.3.0. The waived 3.8.1
+copy under `got` 8 didn't move (its parent's range doesn't allow 4.x).
+
+**Proof.** Rebuilt image, Trivy 0.75.0 image scan (`reports/phase8-f2b/`): moment CVE-2026-17495
+and http-cache-semantics CVE-2026-93748 gone; image still identical to the lockfile (689/689).
+The comparison script also caught a first attempt where the image hadn't been rebuilt: the
+lockfile said 2.31.0 / 4.3.0 and the image still had 2.30.1 / 4.2.0. A scan only proves something
+about the image it scanned.
+
+**Database drift, again.** The rescan downloaded a newer Trivy DB, which added two gating rows
+that F2b didn't cause: body-parser 1.20.6 CVE-2026-111181 and zod 4.4.3 CVE-2023-54404 (both High,
+DoS, fix in range). They're handled in the next commit.
+
+### F2c: body-parser and zod, new in the Trivy DB (2026-10-24)
+
+**Finding.** The F2b rescan's newer DB added two High rows on unchanged code, both gating under
+rule 3: body-parser 1.20.6 CVE-2026-111181 (DoS via an unhandled decompression stream error, fix
+1.20.9; reachable through express) and zod 4.4.3 CVE-2023-54404 (DoS via unbounded array
+validation, fix 4.6.6; used by `lib/config.schema.ts` and `routes/chat.ts`).
+
+**Fix.** `npm update body-parser zod --package-lock-only` (same pinned image as F1). In range:
+body-parser 1.20.6 → 1.20.9 (root `^1.20.4`, express `~1.20.5`), zod 4.4.3 → 4.6.7 (root `^4.4.3`,
+the `ai` SDK packages `^3.25.76 || ^4.1.8`). body-parser 1.20.9 requires `qs ~6.16.0`, so npm added
+a nested `body-parser/node_modules/qs` 6.16.1; express keeps its own qs.
+
+**Proof.** Rebuilt image, Trivy 0.75.0 (`reports/phase8-f2c/`): both rows gone, nothing new
+(142 → 140). Image identical to the lockfile (690/690, +1 for the nested qs). Smoke test: HTTP 200 on
+127.0.0.1:3001, no errors in the logs (zod validates the config at startup). Triage dry run back
+to 3 blocking (search.ts:23, CKV_DOCKER_7, ZAP 10038).
+
+**Lesson.** Three times in one day the DB moved under unchanged code (the router CVEs after F1,
+these two after F2b). A scan result is a snapshot of code *and* advisory data. Phase 9's
+Dependabot and a scheduled scan address the second half.
+
+### F2d: zod in the frontend lockfile, via a scoped npm override (2026-10-24)
+
+**Finding.** The first CI run of this branch (run 40068138288) blocked on one finding: zod 4.4.3
+CVE-2023-54404 (High, fix 4.6.6) in `app/frontend/package-lock.json`. F2c had only refreshed the
+root lockfile. Top parents `@angular/cli` (build tool) and `@angular/forms` (production), so rule 3
+gated it. zod is not in the browser bundle (absent from `3rdpartylicenses.txt` and the built JS),
+but the rule can't know that, and a fix exists.
+
+**Why the local run missed it.** The "final" local triage reused the F1 fs scan, made with an
+older Trivy DB that predates this CVE. After the DB moved (F2b) only the image was rescanned. A
+DB update invalidates *every* earlier scan, not just the one you rerun. CI, which scans everything
+fresh, caught it.
+
+**Why an in-range update didn't work.** `npm update zod` in `frontend/` changed nothing:
+`@angular/cli` 22.1.3 pins zod **exactly** at 4.4.3, and that one copy also satisfies
+`@angular/forms`' `^4.0.10`, so npm keeps a single shared copy.
+
+**Fix.** A scoped override in `app/frontend/package.json` (the project's first use of npm
+`overrides` for a security fix):
+
+```json
+"@angular/forms": { "zod": "^4.6.6" }
+```
+
+then `npm install --package-lock-only --ignore-scripts` in `frontend/` (same pinned node image as
+F1). The lockfile diff is one added entry: `@angular/forms/node_modules/zod` 4.6.7. The top-level
+zod 4.4.3 stays for `@angular/cli` (and `@modelcontextprotocol/sdk` / `zod-to-json-schema` under
+it); overriding the CLI's exact pin was the alternative not taken (plan, F2d).
+
+**Proof.** Rebuilt image (the frontend `npm ci` would refuse a lockfile that disagrees with the
+override), smoke HTTP 200, no log errors. Trivy 0.75.0 image + fs with the current DB
+(`reports/phase8-f2d/`). Triage on those plus CI run 40068138288's Gitleaks and ZAP reports and
+the latest local Semgrep/Checkov: **Gate PASSED, 0 blocking**. zod 4.4.3 is now
+`build stage only (via @angular/cli@22.1.3)`, reported, not gated (D7); 4.6.7 isn't flagged.

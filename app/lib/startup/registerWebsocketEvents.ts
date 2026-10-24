@@ -17,6 +17,16 @@ const globalWithSocketIO = global as typeof globalThis & {
 
 const registerWebsocketEvents = (server: any) => {
   const io = new Server(server, { cors: { origin: 'http://localhost:4200' } })
+  /* Security headers for socket.io's own HTTP responses (local change, phase 8 F5; see app/VENDORED.md).
+     engine.io answers /socket.io/ before Express, so helmet never runs there. This must come AFTER
+     new Server(): engine.io and socket.io replace all 'request' listeners when they attach. */
+  server.prependListener('request', (req: any, res: any) => {
+    if (req.url?.startsWith('/socket.io/')) {
+      res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'")
+      res.setHeader('X-Content-Type-Options', 'nosniff')
+      res.setHeader('X-Frame-Options', 'DENY')
+    }
+  })
   globalWithSocketIO.io = io
 
   io.on('connection', (socket: any) => {

@@ -92,6 +92,9 @@
     "ng2-file-upload": {
       "@angular/core": "$@angular/core",
       "@angular/common": "$@angular/common"
+    },
+    "@angular/forms": {
+      "zod": "^4.6.6"
     }
   },
   "allowScripts": {

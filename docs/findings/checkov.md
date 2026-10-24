@@ -159,3 +159,40 @@ only (not `app/infrastructure/` or tests). See rule 5 for the reasoning behind e
   at least `/app/Dockerfile`, `/app/infrastructure/Dockerfile`, and `/.github/workflows/security.yml`
   are listed in passed/failed file_path unions, and no Checkov-format errors (anchored log-line
   pattern matching `[ERROR]` or `[CRITI]`) appear in `checkov-stderr.log` or `console.log`.
+
+## Fixed in phase 8
+
+### F3: pin both base images by tag and digest (2026-10-24)
+
+**Finding.** CKV_DOCKER_7 at `app/Dockerfile:22`: `FROM gcr.io/distroless/nodejs24-debian13`, no tag,
+so implicitly `latest`. Gating rule 5. The installer stage (`FROM node:24`) passed the check but
+was just as mutable: `node:24` is a moving tag.
+
+**Why it mattered.** With floating bases, two builds of the same commit can ship different OS
+packages and a different Node patch, so a scan describes one build, not the commit. A moved or
+compromised tag would reach the image without any change in the repo.
+
+**Fix.** Both stages pinned by tag and index digest (multi-arch; digests read with
+`docker buildx imagetools inspect` on 2026-10-24, matching the researcher's registry values):
+
+- `node:24.22.1-trixie@sha256:016f604a11c4c725f0a4c62e29ff11adab153d297bf97046c9bf2ddb9f1011d3`:
+  Debian 13 like the runtime (plan D7; `node:24` was bookworm), Node 24.22.1 like distroless.
+- `gcr.io/distroless/nodejs24-debian13:nonroot@sha256:cb606325b7ec4af55462cb0b424a53b452a5b4a894ffe841fcf1048d216fb9f8`:
+  the `nonroot` variant defaults to UID 65532, the same user as the Dockerfile's `USER 65532`, so
+  deleting that line later would not silently fall back to root (defence in depth).
+
+The tag is kept next to the digest for readers; Docker resolves the digest. CKV_DOCKER_7 passes on
+`image:tag@sha256:…` (Checkov 3.3.22 source: it only fails without a `:` or on a trailing
+`:latest`; a bare `image@sha256:…` passes too, because of the `:` in `sha256:`). Checkov still has
+no digest-pinning check, so a later `FROM image:24` would pass. Dependabot (phase 9) keeps the
+digests current.
+
+**Proof.** Checkov 3.3.22 with `.checkov.yaml` (`reports/phase8-f3/checkov/`): dockerfile 308
+passed / 2 failed (was 3 failed), CKV_DOCKER_7 passes at `/app/Dockerfile:21`; the 2 left are
+CKV_DOCKER_2 (no HEALTHCHECK, report-only by policy) on `app/Dockerfile` and
+`app/infrastructure/Dockerfile`. github_actions 252 / 0. Trivy 0.75.0 image scan
+(`reports/phase8-f3/`): Debian 13.7, 140 rows, identical to the F2c image scan. Build OK on the Debian 13
+installer (sqlite3's native module included); smoke test HTTP 200 on 127.0.0.1:3001, no errors in
+the logs; container user 65532 (`docker exec … id` fails: distroless has no `id`). Pinning froze
+what we already had; it didn't change it. That's the point: the next change now has to be a
+commit.

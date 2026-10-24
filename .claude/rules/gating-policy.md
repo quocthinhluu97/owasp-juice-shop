@@ -35,7 +35,7 @@ The rule should be one you could defend to a developer. Start here and change it
    - **10115** (script served from a malicious domain, polyfill.io): A known supply-chain compromise; never a false positive.
 
    Also not gating, each for a written reason (the 4th column of `rules.tsv`):
-   - **10020 / 10021** (anti-clickjacking, nosniff): only fire on `socket.io` polling responses, which are never framed or rendered; helmet covers the HTML pages. FAIL would block on a false positive.
+   - **10020 / 10021** (anti-clickjacking, nosniff): fired only on `socket.io` polling responses, which carry the headers since phase 8 (F5/D17), so they no longer fire; helmet covers the HTML pages. They stay WARN: FAIL would block on a false positive.
    - **10110** (dangerous JS functions): low confidence, fires on any use of the API; gating code is rule 4's job (Semgrep).
    - **10003** (vulnerable JS library): dependency CVEs are rules 2–3's job (Trivy).
    - IGNORE-level rules and plugin IDs not listed in `rules.tsv` (e.g. 120000 from the client add-on) are reported, never gating.
