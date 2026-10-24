@@ -188,6 +188,11 @@ are left as they were.
   - No errors in the container logs.
 
 **Cost.** The "Union SQL Injection" and "Database Schema" challenges can no longer be solved, and
-upstream's `test/cypress/e2e/search.spec.ts` UNION cases would fail (not run here). The coding
-challenge for these two keys still marks line 23 as the vulnerable line, now pointing at fixed
-code. Recorded in `app/VENDORED.md`.
+upstream's `test/cypress/e2e/search.spec.ts` UNION cases would fail (not run here). Upstream's
+`test/api/search.test.ts` SQL-injection cases (lines 42–143 and 161–177, i.e. all but the two "cannot select" cases at 145 and 153: SQLITE_ERROR exposure, UNION selects,
+`sqlite_master`, `'))--` to list logically deleted products) would fail too (not run here). The
+Christmas Special (`christmasSpecialChallenge`) and the leaked unsafe product
+(`dlpPastebinDataLeakChallenge`) lose their intended discovery path (search `'))--` to reveal
+deleted products). Christmas Special can still be solved by guessing the ProductId; whether the
+pastebin one has another path was not checked. The coding challenge for these two keys still marks
+line 23 as the vulnerable line, now pointing at fixed code. Recorded in `app/VENDORED.md`.

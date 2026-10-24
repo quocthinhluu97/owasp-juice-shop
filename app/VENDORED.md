@@ -129,7 +129,11 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
   string interpolation. Clears Semgrep `express-sequelize-injection` (gating rule 4).
 - **Breaks challenges:** "Union SQL Injection" (`unionSqlInjectionChallenge`) and "Database Schema"
   (`dbSchemaChallenge`) are no longer solvable; the UNION cases in `test/cypress/e2e/search.spec.ts`
-  would fail. The `vuln-code-snippet` markers are unchanged, so the coding challenge shows the fixed
+  would fail. The SQL-injection cases in `test/api/search.test.ts` (lines 42–143 and 161–177; the two "cannot select" cases still pass) would fail too (not
+  run here). Christmas Special (`christmasSpecialChallenge`) and the leaked unsafe product
+  (`dlpPastebinDataLeakChallenge`) lose their intended discovery path (search `'))--`). Christmas
+  Special can still be solved by guessing the ProductId; the pastebin one's other paths were not
+  checked. The `vuln-code-snippet` markers are unchanged, so the coding challenge shows the fixed
   line. See `docs/findings/semgrep.md` (F4).
 
 ### Changed: Content-Security-Policy (phase 8, F5)

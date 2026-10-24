@@ -246,7 +246,7 @@ CI reports (run 38422003321):
    talks about.
 2. **The newer Trivy DB added findings F1 didn't cause.** Six days after phase 7 it reported
    `@angular/router` 22.1.1 CVE-2026-111751 and CVE-2026-111752 (High, a frontend direct
-   dependency). They gate rule 3; the decision is pending. It also reported build-stage-only
+   dependency). They gate rule 3; re-waived until 2027-01-16 (plan D13, commit 92ea4d7). It also reported build-stage-only
    `vite` 8.1.5, `@modelcontextprotocol/sdk` 1.29.0 and `hono` 4.13.1 (reported, not gated).
    Scan results move even when the code doesn't.
 

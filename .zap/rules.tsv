@@ -10,8 +10,8 @@
 10015	WARN	(Re-examine Cache-control Directives)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10017	WARN	(Cross-Domain JavaScript Source File Inclusion)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10019	WARN	(Content-Type Header Missing)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
-10020	WARN	(Anti-clickjacking Header)	Fires only on socket.io polling responses (helmet frameguard covers HTML); not framed, so not gating.
-10021	WARN	(X-Content-Type-Options Header Missing)	Fires only on socket.io polling responses (helmet noSniff covers the rest); not gating.
+10020	WARN	(Anti-clickjacking Header)	Fired only on socket.io polling responses, which carry X-Frame-Options since phase 8 (F5/D17): no longer fires. Not framed, so not gating.
+10021	WARN	(X-Content-Type-Options Header Missing)	Fired only on socket.io polling responses, which carry nosniff since phase 8 (F5/D17): no longer fires. Helmet noSniff covers the rest.
 10023	WARN	(Information Disclosure - Debug Error Messages)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10024	WARN	(Information Disclosure - Sensitive Information in URL)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10025	WARN	(Information Disclosure - Sensitive Information in HTTP Referrer Header)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
@@ -27,7 +27,7 @@
 10035	WARN	(Strict-Transport-Security Header)	Plain HTTP in the scan; HSTS belongs to the TLS-terminating front end. Report if it fires.
 10036	WARN	(HTTP Server Response Header)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10037	WARN	(Server Leaks Information via "X-Powered-By" HTTP Response Header Field(s))	helmet hides X-Powered-By; report a regression.
-10038	FAIL	(Content Security Policy (CSP) Header Not Set)	Gating rule 6: no CSP lets any XSS run arbitrary script; high confidence; fix is one header (phase 8 candidate).
+10038	FAIL	(Content Security Policy (CSP) Header Not Set)	Gating rule 6: no CSP lets any XSS run arbitrary script; high confidence; a CSP is set on every response since phase 8 F5 (helmet; socket.io via D17; /profile keeps its own challenge CSP).
 10039	WARN	(X-Backend-Server Header Information Leak)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10040	WARN	(Secure Pages Include Mixed Content)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10041	WARN	(HTTP to HTTPS Insecure Transition in Form Post)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
@@ -38,7 +38,7 @@
 10050	WARN	(Retrieved from Cache)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10052	WARN	(X-ChromeLogger-Data (XCOLD) Header Information Leak)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
 10054	WARN	(Cookie without SameSite Attribute)	Cookie flags: report; review if a server-set session cookie fires.
-10055	WARN	(CSP)	Weak CSP directives: becomes relevant once a CSP exists (phase 8). Report.
+10055	WARN	(CSP)	CSP exists since phase 8 F5; expected WARN: style-src 'unsafe-inline' (D11), report only.
 10056	WARN	(X-Debug-Token Information Leak)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.
 10057	WARN	(Username Hash Found)	Report only: not observed on Juice Shop (phase 6 scans); review if it fires.
 10061	WARN	(X-AspNet-Version Response Header)	Report only: technology not used by Juice Shop (Node/Express/Angular); review if it fires.

@@ -187,7 +187,10 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
   app.use(helmet.frameguard())
   /* Content-Security-Policy (local change, phase 8 F5; see app/VENDORED.md). The hashes pin the exact
      inline scripts of index.html (cookie consent), views/promotionVideo.pug and serve-index's /ftp listing:
-     if one of them changes, recompute its hash. /profile still sets its own CSP (routes/userProfile.ts). */
+     if one of them changes, recompute its hash. The cookie-consent hash is for config/default.yml:
+     lib/startup/customizeApplication.ts rewrites that inline script from application.cookieConsent.*
+     at startup, so the configs that override it (7ms, addo, bodgeit, defcon33, mozilla, oss) need
+     their own hash or the banner is blocked. /profile still sets its own CSP (routes/userProfile.ts). */
   app.use(helmet.contentSecurityPolicy({
     useDefaults: false,
     directives: {

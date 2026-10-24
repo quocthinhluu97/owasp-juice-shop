@@ -263,8 +263,9 @@ limits what an injected script can do.
 - Served pages (`reports/phase8-f5/after/`): every executable inline script's hash is in the
   header, no inline event handlers left on `/`; socket.io handshake carries the strict CSP,
   `nosniff`, `DENY`.
-- Browser (Chrome, 127.0.0.1:3001): home, `/promotion`, `/ftp`, `/api-docs` render; console on `/`
-  clean (no "Refused to …"), with the socket.io connection opened on load.
+- Browser (Chrome, 127.0.0.1:3001): `/`, `/promotion` (page and player render), `/ftp` and
+  `/api-docs` render; DevTools console on `/` clean (no "Refused to …"), with the socket.io
+  connection opened on load.
 - ZAP baseline, same setup as phase 6 (`reports/phase8-f5/zap/`): **10038 gone**, and 10020/10021
   gone too. FAIL 2 → 1, WARN 8 → 6, PASS 53 → 56. The remaining FAIL is 10028 (open redirect,
   deliberate, waived).
@@ -277,9 +278,16 @@ gating): Angular Material and the server-rendered views use inline styles (D11, 
 **Costs and limits.**
 - The hashes pin exact bytes. Any change to those inline scripts (a Juice Shop upgrade, an edited
   template) silently breaks that script until the hash is recomputed; the browser console shows it.
+- The cookie-consent hash is for `config/default.yml`. `lib/startup/customizeApplication.ts`
+  rewrites that inline script from `application.cookieConsent.*` at startup, so the configs that
+  override it (7ms, addo, bodgeit, defcon33, mozilla, oss) need their own hash or the banner is
+  blocked.
 - XSS challenges that are verified server-side (localXss, reflectedXss, xssBonus, videoXss) still
   register as solved; the injected `alert` and the SoundCloud iframe no longer visibly run.
-- The Web3 sandbox allowances (`binaries.soliditylang.org`, `'wasm-unsafe-eval'`, `blob:` workers)
-  were not exercised in the browser.
+- Not checked in the browser: search, login (including Google OAuth, which depends on
+  `connect-src https://www.googleapis.com`), basket, score board, a "challenge solved" notification
+  arriving over socket.io, video subtitles, `/ftp` client-side sorting, and the Web3 sandbox
+  (`binaries.soliditylang.org`, `'wasm-unsafe-eval'`, `blob:` workers). ZAP's Client Spider crawled
+  the app with the CSP enforced, but that is not a functional check.
 - 10063 (deprecated `Feature-Policy` instead of `Permissions-Policy`) is still a WARN: the cheap
   alternative this phase didn't pick.
