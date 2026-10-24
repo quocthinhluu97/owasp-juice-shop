@@ -122,3 +122,12 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
   `FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:cb606325…6fb9f8`.
 - Why: reproducible builds and scans; clears Checkov CKV_DOCKER_7 (gating rule 5). The installer
   moves from Debian 12 to 13 to match the runtime. See `docs/findings/checkov.md` (F3).
+
+### Changed: parameterised product search (phase 8, F4)
+
+- `routes/search.ts:23`: the search query uses a Sequelize replacement (`LIKE :q`) instead of
+  string interpolation. Clears Semgrep `express-sequelize-injection` (gating rule 4).
+- **Breaks challenges:** "Union SQL Injection" (`unionSqlInjectionChallenge`) and "Database Schema"
+  (`dbSchemaChallenge`) are no longer solvable; the UNION cases in `test/cypress/e2e/search.spec.ts`
+  would fail. The `vuln-code-snippet` markers are unchanged, so the coding challenge shows the fixed
+  line. See `docs/findings/semgrep.md` (F4).

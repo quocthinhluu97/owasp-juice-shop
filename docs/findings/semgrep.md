@@ -148,3 +148,46 @@ custom data stores or flows across files. ZAP (phase 6) and manual review cover 
 - **Cost:** `search.ts:23` is the vulnerable line for both "Union SQL Injection" and "Database
   Schema", so both challenges break, as does `test/cypress/e2e/search.spec.ts`. Note it in
   `VENDORED.md`.
+
+## Fixed in phase 8
+
+### F4: parameterised product search (2026-10-24)
+
+**Finding.** `javascript.sequelize.security.audit.sequelize-injection-express.express-sequelize-injection`
+(ERROR) at `app/routes/search.ts:23`: the search term `q` was interpolated into the SQL string.
+Gating rule 4.
+
+**Why it mattered.** Reachable without login (`/rest/products/search?q=`). Upstream's own test
+payload `')) union select id,'2','3',email,password,'6','7','8','9' from users--` returned every
+user's email and password hash, and `sqlite_master` gave away the schema.
+
+**Fix.** Constant SQL, input passed as a Sequelize replacement:
+
+```ts
+models.sequelize.query(
+  'SELECT * FROM Products WHERE ((name LIKE :q OR description LIKE :q) AND deletedAt IS NULL) ORDER BY name',
+  { replacements: { q: `%${criteria}%` } })
+```
+
+The `%` wildcards go inside the value, not the SQL. Upstream's "correct" coding-challenge answer
+(`codefixes/unionSqlInjectionChallenge_2_correct.ts`, `LIKE '%:criteria%'`) is not a working fix:
+Sequelize 6.37.8 skips placeholders inside quoted literals (`src/utils/sql.ts`), so every search
+would match the literal text `:criteria` and return nothing, while Semgrep would report the finding
+as fixed. A fix that satisfies the scanner and breaks the feature. The `vuln-code-snippet` markers
+are left as they were.
+
+**Proof.**
+- Semgrep 1.179.0, same configs as CI (`reports/phase8-f4/semgrep.json`): 37 → 36 findings; the
+  only one gone is this one; nothing new; 688 files scanned and the same 8 known Angular template
+  errors as phase 7.
+- Rebuilt image, smoke test HTTP 200, on 127.0.0.1:3001:
+  - `q=apple` → 3 products (Apple Juice, Apple Pomace, Pineapple Juice): search still works.
+  - The UNION payload → `{"status":"success","data":[]}`: no user rows; the payload is just a
+    search string now.
+  - `q='` → HTTP 200 (a lone quote used to break the SQL).
+  - No errors in the container logs.
+
+**Cost.** The "Union SQL Injection" and "Database Schema" challenges can no longer be solved, and
+upstream's `test/cypress/e2e/search.spec.ts` UNION cases would fail (not run here). The coding
+challenge for these two keys still marks line 23 as the vulnerable line, now pointing at fixed
+code. Recorded in `app/VENDORED.md`.
