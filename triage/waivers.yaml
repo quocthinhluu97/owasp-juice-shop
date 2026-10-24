@@ -44,9 +44,17 @@ waivers:
 
   # --- rule 3 ---
   - fingerprint: "vuln:CVE-2026-101896:@angular/router:22.1.1"   # CVE-2026-101896 @angular/router@22.1.1
-    reason: "Ships in the browser bundle (direct frontend dependency); fix 22.2.0 is a minor bump of the Angular set. Deferred to phase 8 (short expiry)."
+    reason: "Ships in the browser bundle (direct frontend dependency). The fix needs the whole Angular set at 22.2.x (exact @angular/core peer pin), and @angular/build 22.2 writes browser-stats.json instead of stats.json, which breaks the frontend sbom script (the phase 1 break). Judged in phase 8 (D13): not worth a sixth fix there; re-judge at expiry."
     owner: quocthinhluu97
-    expires: 2026-11-30
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-111751:@angular/router:22.1.1"   # CVE-2026-111751 @angular/router@22.1.1
+    reason: "Same as CVE-2026-101896 (fix 22.2.1): Ships in the browser bundle (direct frontend dependency). The fix needs the whole Angular set at 22.2.x (exact @angular/core peer pin), and @angular/build 22.2 writes browser-stats.json instead of stats.json, which breaks the frontend sbom script (the phase 1 break). Judged in phase 8 (D13): not worth a sixth fix there; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
+  - fingerprint: "vuln:CVE-2026-111752:@angular/router:22.1.1"   # CVE-2026-111752 @angular/router@22.1.1
+    reason: "Same as CVE-2026-101896 (fix 22.2.1): Ships in the browser bundle (direct frontend dependency). The fix needs the whole Angular set at 22.2.x (exact @angular/core peer pin), and @angular/build 22.2 writes browser-stats.json instead of stats.json, which breaks the frontend sbom script (the phase 1 break). Judged in phase 8 (D13): not worth a sixth fix there; re-judge at expiry."
+    owner: quocthinhluu97
+    expires: 2027-01-16
   - fingerprint: "vuln:CVE-2026-19481:@fastify/busboy:2.1.1"   # CVE-2026-19481 @fastify/busboy@2.1.1
     reason: "Pulled in only by undici 5.29.0 (via @ai-sdk/provider-utils, used by routes/chat.ts), which requires @fastify/busboy ^2.0.0; the fix 3.2.1 is a major, so it needs an undici upgrade or an override. Whether newer undici still uses busboy is not checked."
     owner: quocthinhluu97
