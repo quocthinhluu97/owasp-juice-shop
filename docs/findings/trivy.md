@@ -337,3 +337,38 @@ to 3 blocking (search.ts:23, CKV_DOCKER_7, ZAP 10038).
 **Lesson.** Three times in one day the DB moved under unchanged code (the router CVEs after F1,
 these two after F2b). A scan result is a snapshot of code *and* advisory data. Phase 9's
 Dependabot and a scheduled scan address the second half.
+
+### F2d: zod in the frontend lockfile, via a scoped npm override (2026-10-24)
+
+**Finding.** The first CI run of this branch (run 40068138288) blocked on one finding: zod 4.4.3
+CVE-2023-54404 (High, fix 4.6.6) in `app/frontend/package-lock.json`. F2c had only refreshed the
+root lockfile. Top parents `@angular/cli` (build tool) and `@angular/forms` (production), so rule 3
+gated it. zod is not in the browser bundle (absent from `3rdpartylicenses.txt` and the built JS),
+but the rule can't know that, and a fix exists.
+
+**Why the local run missed it.** The "final" local triage reused the F1 fs scan, made with an
+older Trivy DB that predates this CVE. After the DB moved (F2b) only the image was rescanned. A
+DB update invalidates *every* earlier scan, not just the one you rerun. CI, which scans everything
+fresh, caught it.
+
+**Why an in-range update didn't work.** `npm update zod` in `frontend/` changed nothing:
+`@angular/cli` 22.1.3 pins zod **exactly** at 4.4.3, and that one copy also satisfies
+`@angular/forms`' `^4.0.10`, so npm keeps a single shared copy.
+
+**Fix.** A scoped override in `app/frontend/package.json` (the project's first use of npm
+`overrides` for a security fix):
+
+```json
+"@angular/forms": { "zod": "^4.6.6" }
+```
+
+then `npm install --package-lock-only --ignore-scripts` in `frontend/` (same pinned node image as
+F1). The lockfile diff is one added entry: `@angular/forms/node_modules/zod` 4.6.7. The top-level
+zod 4.4.3 stays for `@angular/cli` (and `@modelcontextprotocol/sdk` / `zod-to-json-schema` under
+it); overriding the CLI's exact pin was the alternative not taken (plan, F2d).
+
+**Proof.** Rebuilt image (the frontend `npm ci` would refuse a lockfile that disagrees with the
+override), smoke HTTP 200, no log errors. Trivy 0.75.0 image + fs with the current DB
+(`reports/phase8-f2d/`). Triage on those plus CI run 40068138288's Gitleaks and ZAP reports and
+the latest local Semgrep/Checkov: **Gate PASSED, 0 blocking**. zod 4.4.3 is now
+`build stage only (via @angular/cli@22.1.3)`, reported, not gated (D7); 4.6.7 isn't flagged.

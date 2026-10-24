@@ -149,3 +149,11 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
 - Changes the XSS challenges' visible effect (the injected scripts are blocked) but they still
   register as solved; `/profile` keeps the CSP-bypass challenge's own policy. See
   `docs/findings/zap.md` (F5).
+
+### Changed: npm override for zod under @angular/forms (phase 8, F2d)
+
+- `frontend/package.json` `overrides`: added `"@angular/forms": { "zod": "^4.6.6" }`;
+  `frontend/package-lock.json` gains one nested `@angular/forms/node_modules/zod` 4.6.7.
+- Why: zod 4.4.3 CVE-2023-54404 (High) gated via `@angular/forms`; `@angular/cli` pins zod exactly,
+  so no in-range update could fix it. The CLI's own 4.4.3 copy stays (build stage only). See
+  `docs/findings/trivy.md` (F2d).
