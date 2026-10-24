@@ -298,3 +298,21 @@ The "no fix listed" gap is worth remembering. Rule 3 trusts Trivy's `FixedVersio
 field turns a fixable High into report-only.
 
 **Also.** Upstream's `|| cd .` still hides a failed server compile. Out of scope (phase 8 plan, D15).
+
+### F2b: refresh the two findings the drift had hidden (2026-10-24)
+
+**Fix.** `npm update moment http-cache-semantics --package-lock-only --ignore-scripts --no-audit
+--no-fund` in the same pinned `node:24.22.1-trixie` image as F1. Three lockfile changes, all in
+range: moment 2.30.1 → 2.31.0, `sqlite3/node_modules/http-cache-semantics` 4.2.0 → 4.3.0, and the
+dev-only `make-fetch-happen/node_modules/http-cache-semantics` 4.2.0 → 4.3.0. The waived 3.8.1
+copy under `got` 8 didn't move (its parent's range doesn't allow 4.x).
+
+**Proof.** Rebuilt image, Trivy 0.75.0 image scan (`reports/phase8-f2b/`): moment CVE-2026-17495
+and http-cache-semantics CVE-2026-93748 gone; image still identical to the lockfile (689/689).
+The comparison script also caught a first attempt where the image hadn't been rebuilt: the
+lockfile said 2.31.0 / 4.3.0 and the image still had 2.30.1 / 4.2.0. A scan only proves something
+about the image it scanned.
+
+**Database drift, again.** The rescan downloaded a newer Trivy DB, which added two gating rows
+that F2b didn't cause: body-parser 1.20.6 CVE-2026-111181 and zod 4.4.3 CVE-2023-54404 (both High,
+DoS, fix in range). They're handled in the next commit.

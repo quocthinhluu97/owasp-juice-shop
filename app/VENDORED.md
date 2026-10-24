@@ -99,3 +99,10 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
 - Why: `npm ci` installs exactly what the lockfile says and fails on a `package.json` mismatch,
   instead of rewriting the lock. The frontend lockfile is enforced too, not just the root one.
 - Proof and the drift it fixed: `docs/findings/trivy.md` ("Fixed in phase 8", F2).
+
+### Changed: lockfile refresh of moment and http-cache-semantics (phase 8, F2b)
+
+- `app/package-lock.json` only: moment 2.30.1 → 2.31.0 and two nested http-cache-semantics copies
+  4.2.0 → 4.3.0, via `npm update moment http-cache-semantics --package-lock-only`, all in range.
+- Why: once F2 made the image follow the lockfile, these two findings (hidden by the old dedupe
+  drift) shipped again. See `docs/findings/trivy.md` (F2b).
