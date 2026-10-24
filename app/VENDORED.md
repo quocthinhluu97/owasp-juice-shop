@@ -61,4 +61,23 @@ lockfile.
 Side effects: builds are reproducible, and Trivy's `fs` scan can read exact dependency versions.
 **Caveat (phase 3):** not fully. 11 production package versions in the image differ from the
 lockfile, likely changed by the Dockerfile's `npm dedupe`; see `docs/findings/trivy.md`.
+(That count is against the phase 3 lockfile. The lockfile was refreshed in phase 8 F1, below;
+the drift itself is fixed in phase 8 F2.)
 Dependencies stay at their 2026-08 versions until deliberately updated (a phase 8 candidate).
+
+### Changed: lockfile refresh (phase 8, F1)
+
+- Changed `app/package-lock.json` (root lockfile only). `package.json`, `frontend/` and
+  `frontend/package-lock.json` are unchanged.
+- Run in the pinned `node:24.22.1-trixie` container with `--ignore-scripts`:
+
+  ```bash
+  npm update brace-expansion js-yaml compression proxy-addr hbs --package-lock-only --ignore-scripts --no-audit --no-fund
+  ```
+
+- Ten in-range version changes, including direct and transitive dependencies. `hbs` 4.2.1 → 4.4.0
+  pins `handlebars` 4.7.10. The table and the scanner proof are in `docs/findings/trivy.md` ("Fixed in
+  phase 8", F1).
+- Why: the committed lockfile was stale. The image had drifted off it, and `npm ci` (F2) without
+  this refresh would have shipped the vulnerable versions. These packages are in the image and
+  reachable (`compression`, `proxy-addr`, `handlebars`), so the refresh fixes them directly.

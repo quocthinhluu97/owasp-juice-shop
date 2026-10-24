@@ -174,3 +174,78 @@ well: grep-level evidence is a reason to deprioritise, not to suppress.
 2. **Dependency bump:** none of the top packages is a simple same-major bump: `multer` needs
    1 → 2, and `undici` and `tar` need parent upgrades. Before picking one, list the High/Critical
    findings whose fix is on the *installed* major line. Those are the cheap bumps.
+
+## Fixed in phase 8
+
+### F1: in-range lockfile refresh (2026-10-24)
+
+**Finding.** Phase 7's triage blocked on five lockfile-only rows, all marked "presence: fs only"
+(the image already had fixed versions):
+
+- `brace-expansion` 1.1.18 and 2.1.4: CVE-2026-102276 and CVE-2026-102278 (High), 4 rows.
+- `js-yaml` 3.15.1: CVE-2026-84375 (High), 1 row.
+
+Three more were waived until 2026-11-30 as "deferred to phase 8", because they were in the image
+and reachable:
+
+- `compression` 1.8.1: CVE-2026-87776 (High), used directly in `server.ts`.
+- `proxy-addr` 2.0.7: CVE-2026-90711 (Critical), used by express core.
+- `handlebars` 4.7.9: CVE-2026-106445 and CVE-2026-106446 (Critical), used by the `hbs` view
+  engine (`server.ts:164`).
+
+**Why it mattered.** The image already shipped `brace-expansion` 1.1.21 / 2.1.7 and `js-yaml`
+3.15.2, because `npm install` plus `npm dedupe` drift off the lockfile (the drift section above).
+The lockfile was stale. Switching to `npm ci` (F2) without refreshing it first would have put the
+vulnerable versions into the image.
+
+**Fix.** Inside the pinned container `node:24.22.1-trixie@sha256:016f604a11c4c725f0a4c62e29ff11adab153d297bf97046c9bf2ddb9f1011d3`,
+root lockfile only, `package.json` unchanged:
+
+```bash
+npm update brace-expansion js-yaml compression proxy-addr hbs --package-lock-only --ignore-scripts --no-audit --no-fund
+```
+
+| Lockfile path | Before | After | Note |
+|---|---|---|---|
+| `brace-expansion` | 1.1.18 | 1.1.21 | |
+| `glob/node_modules/brace-expansion` | 2.1.4 | 2.1.7 | |
+| `@typescript-eslint/typescript-estree/node_modules/brace-expansion` | 5.0.9 | 5.0.12 | moved by `npm update` (below) |
+| `js-yaml` | 3.15.1 | 3.15.2 | |
+| `@eslint/eslintrc/node_modules/js-yaml` | 4.3.1 | 4.3.2 | moved by `npm update` (below) |
+| `xmlbuilder2/node_modules/js-yaml` | 4.3.1 | 4.3.2 | moved by `npm update` (below) |
+| `compression` | 1.8.1 | 1.8.2 | adds `destroy` 1.2.0, already in the lockfile |
+| `proxy-addr` | 2.0.7 | 2.0.8 | |
+| `hbs` | 4.2.1 | 4.4.0 | pins `handlebars` 4.7.10 |
+| `handlebars` | 4.7.9 | 4.7.10 | |
+
+- `npm update <name>` moves every copy of that name in the tree, so the extra copies of
+  `brace-expansion` 5.x and `js-yaml` 4.x moved too.
+- `hbs` 4.4.0 was 2 days old when taken. That's an accepted risk (D3). It
+  pins `handlebars` 4.7.10 exactly, so no `overrides` entry was needed.
+
+**Proof.** Local Trivy 0.75.0 on the new lockfile (`reports/phase8/`), compared with the phase 7
+CI reports (run 38422003321):
+
+- `trivy fs`: the F1 rows are gone, 12 rows across Critical/High/Medium: `brace-expansion` ×6
+  (CVE-2026-102276, -102277, -102278), `js-yaml` ×1, `compression` ×1, `handlebars` ×3
+  (CVE-2026-106444, -106445, -106446) and `proxy-addr` ×1 (the root copy). One `proxy-addr` row
+  remains; see lesson 1.
+- `trivy image`: the `compression`, `proxy-addr` and `handlebars` rows are gone (5 rows).
+  `brace-expansion` and `js-yaml` were already fixed in the image.
+- Image build OK. Smoke test HTTP 200 on `127.0.0.1:3001`, and no errors in the logs.
+- Triage dry run (phase 7 CI inputs with the new Trivy reports, `--offline`): 8 → 5 blocking.
+  The five F1 rows are gone, and two new `@angular/router` rows are blocking (lesson 2). The four
+  removed waivers match nothing now: 0 expired waivers, 0 waiver warnings.
+
+**Lessons.**
+
+1. **`proxy-addr` 2.0.7 still appears in the fs scan.** It's a second copy in the **frontend**
+   lockfile, via `@angular/cli` → `express` 5. It's build stage only (D7), so it doesn't gate.
+   The removed waiver's fingerprint (CVE + package + version) had silently covered both copies,
+   though its reason only described the backend one. A waiver can match more than its reason
+   talks about.
+2. **The newer Trivy DB added findings F1 didn't cause.** Six days after phase 7 it reported
+   `@angular/router` 22.1.1 CVE-2026-111751 and CVE-2026-111752 (High, a frontend direct
+   dependency). They gate rule 3; the decision is pending. It also reported build-stage-only
+   `vite` 8.1.5, `@modelcontextprotocol/sdk` 1.29.0 and `hono` 4.13.1 (reported, not gated).
+   Scan results move even when the code doesn't.

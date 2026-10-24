@@ -55,10 +55,6 @@ waivers:
     reason: "Pulled in only via jwa 0.0.1 / jws 0.2.6 under the deliberate jsonwebtoken pins (JWT challenges); fixed only by bumping those."
     owner: quocthinhluu97
     expires: 2027-01-16
-  - fingerprint: "vuln:CVE-2026-87776:compression:1.8.1"   # CVE-2026-87776 compression@1.8.1
-    reason: "Reachable (direct, server.ts); the 1.8.2 patch is inside the ^1.8.1 range, so a lockfile refresh fixes it. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
   - fingerprint: "vuln:CVE-2023-46233:crypto-js:3.3.0"   # CVE-2023-46233 crypto-js@3.3.0
     reason: "Via pdfkit 0.11.0: crypto-js runs (MD5 file ID) but neither vulnerable function does; PBKDF2 is never called and WordArray.random only for password-protected PDFs, which routes/order.ts never makes (docs/findings/trivy.md)."
     owner: quocthinhluu97
@@ -75,14 +71,6 @@ waivers:
     reason: "Part of the deliberate JWT challenge chain: jsonwebtoken 0.1.0 (via express-jwt 0.1.3) and 0.4.0 are pinned upstream for the JWT forging challenges (docs/findings/trivy.md); bumping breaks them."
     owner: quocthinhluu97
     expires: 2027-01-16
-  - fingerprint: "vuln:CVE-2026-106445:handlebars:4.7.9"   # CVE-2026-106445 handlebars@4.7.9
-    reason: "Reachable (hbs view engine, server.ts:164); hbs 4.2.1 pins handlebars exactly at 4.7.9, so the 4.7.10 patch needs an npm override or a newer hbs. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
-  - fingerprint: "vuln:CVE-2026-106446:handlebars:4.7.9"   # CVE-2026-106446 handlebars@4.7.9
-    reason: "Reachable (hbs view engine, server.ts:164); hbs 4.2.1 pins handlebars exactly at 4.7.9, so the 4.7.10 patch needs an npm override or a newer hbs. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
   - fingerprint: "vuln:CVE-2022-25881:http-cache-semantics:3.8.1"   # CVE-2022-25881 http-cache-semantics@3.8.1
     reason: "Via cacheable-request <- got 8 <- download, used at startup to fetch configured image URLs; the ReDoS needs a hostile Cache-Control header from a server we chose."
     owner: quocthinhluu97
@@ -191,10 +179,6 @@ waivers:
     reason: "Reachable (file uploads in server.ts), not deliberate. Every fix is on multer 2.x: a major upgrade that may change the upload API and break upload challenges. Phase 8 candidate; re-judge at expiry."
     owner: quocthinhluu97
     expires: 2027-01-16
-  - fingerprint: "vuln:CVE-2026-90711:proxy-addr:2.0.7"   # CVE-2026-90711 proxy-addr@2.0.7
-    reason: "Reachable (express core); 2.0.8 is inside express's ~2.0.7 range, so a lockfile refresh fixes it. Deferred to phase 8 (short expiry)."
-    owner: quocthinhluu97
-    expires: 2026-11-30
   - fingerprint: "vuln:CVE-2022-25887:sanitize-html:1.4.2"   # CVE-2022-25887 sanitize-html@1.4.2
     reason: "Deliberately ancient direct pin used by lib/insecurity.ts for the XSS challenges (docs/findings/trivy.md); bumping breaks them."
     owner: quocthinhluu97
