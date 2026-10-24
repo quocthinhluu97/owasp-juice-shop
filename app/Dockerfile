@@ -1,4 +1,4 @@
-FROM node:24 AS installer
+FROM node:24.22.1-trixie@sha256:016f604a11c4c725f0a4c62e29ff11adab153d297bf97046c9bf2ddb9f1011d3 AS installer
 COPY . /juice-shop
 WORKDIR /juice-shop
 RUN npm install -g typescript@^6.0.3
@@ -18,7 +18,7 @@ ARG CYCLONEDX_NPM_VERSION='^2.0.0||^3.0.0||^4.0.0'
 RUN npm install -g @cyclonedx/cyclonedx-npm@$CYCLONEDX_NPM_VERSION
 RUN npm run sbom
 
-FROM gcr.io/distroless/nodejs24-debian13
+FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:cb606325b7ec4af55462cb0b424a53b452a5b4a894ffe841fcf1048d216fb9f8
 ARG BUILD_DATE
 ARG VCS_REF
 LABEL maintainer="Bjoern Kimminich <bjoern.kimminich@owasp.org>" \

@@ -59,7 +59,7 @@ Both `.npmrc` files need the change: `.dockerignore` excludes only the root `.np
 lockfile.
 
 Side effects: the npm packages in the image are reproducible (`npm ci`, phase 8 F2, below), and
-Trivy's `fs` scan can read exact dependency versions. Base images still float until phase 8 F3.
+Trivy's `fs` scan can read exact dependency versions. Base images are pinned by digest since phase 8 F3.
 **Caveat (phase 3), fixed in phase 8 F2:** until then, 11 production package versions in the image
 differed from the lockfile, likely changed by the Dockerfile's `npm dedupe`; see
 `docs/findings/trivy.md`. Checked 2026-10-24: the image's npm packages now match the lockfile.
@@ -113,3 +113,12 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
   4.4.3 → 4.6.7, via `npm update body-parser zod --package-lock-only`, all in range.
 - Why: two High DoS CVEs added to the Trivy DB on 2026-10-24, both reachable. See
   `docs/findings/trivy.md` (F2c).
+
+### Changed: base images pinned by tag and digest (phase 8, F3)
+
+- `app/Dockerfile`: `FROM node:24 AS installer` →
+  `FROM node:24.22.1-trixie@sha256:016f604a…1011d3 AS installer`, and
+  `FROM gcr.io/distroless/nodejs24-debian13` →
+  `FROM gcr.io/distroless/nodejs24-debian13:nonroot@sha256:cb606325…6fb9f8`.
+- Why: reproducible builds and scans; clears Checkov CKV_DOCKER_7 (gating rule 5). The installer
+  moves from Debian 12 to 13 to match the runtime. See `docs/findings/checkov.md` (F3).
