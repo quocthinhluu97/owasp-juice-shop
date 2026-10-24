@@ -72,7 +72,11 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": { "minify": true, "inlineCritical": false },
+                "fonts": true
+              },
               "outputHashing": "media",
               "sourceMap": false,
               "extractLicenses": true,

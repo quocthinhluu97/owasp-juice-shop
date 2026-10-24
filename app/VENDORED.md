@@ -131,3 +131,17 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
   (`dbSchemaChallenge`) are no longer solvable; the UNION cases in `test/cypress/e2e/search.spec.ts`
   would fail. The `vuln-code-snippet` markers are unchanged, so the coding challenge shows the fixed
   line. See `docs/findings/semgrep.md` (F4).
+
+### Changed: Content-Security-Policy (phase 8, F5)
+
+- `server.ts`: `helmet.contentSecurityPolicy` with an explicit, enforcing policy. Inline scripts are
+  allowed by hash (index.html cookie consent, `views/promotionVideo.pug`, serve-index on `/ftp`);
+  recompute a hash if its script changes.
+- `frontend/angular.json`: production `optimization` is an object with
+  `styles.inlineCritical: false`, so the build no longer emits the `onload` stylesheet loader the
+  CSP would block.
+- `lib/startup/registerWebsocketEvents.ts`: security headers (strict CSP, nosniff, DENY) on
+  socket.io's own HTTP responses, which bypass Express.
+- Changes the XSS challenges' visible effect (the injected scripts are blocked) but they still
+  register as solved; `/profile` keeps the CSP-bypass challenge's own policy. See
+  `docs/findings/zap.md` (F5).

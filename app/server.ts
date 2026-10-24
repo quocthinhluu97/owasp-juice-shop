@@ -185,6 +185,30 @@ function configureApp (app: ReturnType<typeof express>, seq: typeof sequelize) {
   /* Security middleware */
   app.use(helmet.noSniff())
   app.use(helmet.frameguard())
+  /* Content-Security-Policy (local change, phase 8 F5; see app/VENDORED.md). The hashes pin the exact
+     inline scripts of index.html (cookie consent), views/promotionVideo.pug and serve-index's /ftp listing:
+     if one of them changes, recompute its hash. /profile still sets its own CSP (routes/userProfile.ts). */
+  app.use(helmet.contentSecurityPolicy({
+    useDefaults: false,
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'",
+        "'sha256-2ADpmZIga9zdrCfzZ7IWyavasltpcKCkxomklfMTCG0='", // index.html cookieconsent init
+        "'sha256-9MsdBx9vZ9NzdkYLMYk/U1qJmmxuixSv2ivJtXTG9tY='", // /promotion subtitle parser
+        "'sha256-j0AtA2O/cVxpdC/QDn03jauGuGRtshgWGPnWVxLfOgs='", // /ftp serve-index sorting
+        'https://binaries.soliditylang.org', "'wasm-unsafe-eval'"], // Web3 sandbox compiler worker
+      scriptSrcAttr: ["'none'"],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'", 'https://www.googleapis.com', 'https://ethereum-sepolia.blockpi.network'], // 'self' covers same-origin ws:/wss: (CSP Level 3)
+      workerSrc: ["'self'", 'blob:'],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      frameAncestors: ["'self'"],
+      formAction: ["'self'"]
+    }
+  }))
   // app.use(helmet.xssFilter()); // = no protection from persisted XSS via RESTful API
   app.disable('x-powered-by')
   app.use(featurePolicy({
