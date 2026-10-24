@@ -316,3 +316,24 @@ about the image it scanned.
 **Database drift, again.** The rescan downloaded a newer Trivy DB, which added two gating rows
 that F2b didn't cause: body-parser 1.20.6 CVE-2026-111181 and zod 4.4.3 CVE-2023-54404 (both High,
 DoS, fix in range). They're handled in the next commit.
+
+### F2c: body-parser and zod, new in the Trivy DB (2026-10-24)
+
+**Finding.** The F2b rescan's newer DB added two High rows on unchanged code, both gating under
+rule 3: body-parser 1.20.6 CVE-2026-111181 (DoS via an unhandled decompression stream error, fix
+1.20.9; reachable through express) and zod 4.4.3 CVE-2023-54404 (DoS via unbounded array
+validation, fix 4.6.6; used by `lib/config.schema.ts` and `routes/chat.ts`).
+
+**Fix.** `npm update body-parser zod --package-lock-only` (same pinned image as F1). In range:
+body-parser 1.20.6 → 1.20.9 (root `^1.20.4`, express `~1.20.5`), zod 4.4.3 → 4.6.7 (root `^4.4.3`,
+the `ai` SDK packages `^3.25.76 || ^4.1.8`). body-parser 1.20.9 requires `qs ~6.16.0`, so npm added
+a nested `body-parser/node_modules/qs` 6.16.1; express keeps its own qs.
+
+**Proof.** Rebuilt image, Trivy 0.75.0 (`reports/phase8-f2c/`): both rows gone, nothing new
+(142 → 140). Image identical to the lockfile (690/690, +1 for the nested qs). Smoke test: HTTP 200 on
+127.0.0.1:3001, no errors in the logs (zod validates the config at startup). Triage dry run back
+to 3 blocking (search.ts:23, CKV_DOCKER_7, ZAP 10038).
+
+**Lesson.** Three times in one day the DB moved under unchanged code (the router CVEs after F1,
+these two after F2b). A scan result is a snapshot of code *and* advisory data. Phase 9's
+Dependabot and a scheduled scan address the second half.

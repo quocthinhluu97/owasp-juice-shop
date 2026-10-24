@@ -106,3 +106,10 @@ Dependencies stay at their 2026-08 versions until deliberately updated (a phase 
   4.2.0 → 4.3.0, via `npm update moment http-cache-semantics --package-lock-only`, all in range.
 - Why: once F2 made the image follow the lockfile, these two findings (hidden by the old dedupe
   drift) shipped again. See `docs/findings/trivy.md` (F2b).
+
+### Changed: lockfile refresh of body-parser and zod (phase 8, F2c)
+
+- `app/package-lock.json` only: body-parser 1.20.6 → 1.20.9 (adds nested qs 6.16.1) and zod
+  4.4.3 → 4.6.7, via `npm update body-parser zod --package-lock-only`, all in range.
+- Why: two High DoS CVEs added to the Trivy DB on 2026-10-24, both reachable. See
+  `docs/findings/trivy.md` (F2c).
