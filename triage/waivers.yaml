@@ -3,6 +3,7 @@
 # expires is the last day it applies, at most 90 days after the run date; expired waivers stop applying.
 # Two expiries: 2027-01-16 (deliberate challenge material, or not reachable / fix needs a major upgrade:
 # re-judge then) and 2026-11-30 (cheap fixes deferred to phase 8: they should be fixed, not renewed).
+# Phase 8 (2026-10-24): every 2026-11-30 entry was fixed and removed, or judged and moved to 2027-01-16.
 # Drafted 2026-10-18 from triage run on CI run 38422003321; reviewed by the owner before commit.
 #
 # Selector: fingerprint, or cve: CVE-YYYY-NNNN + package. Fields: reason, owner (GitHub handle), expires (YYYY-MM-DD).
@@ -260,9 +261,9 @@ waivers:
     owner: quocthinhluu97
     expires: 2027-01-16
   - fingerprint: "vuln:CVE-2026-48779:ws:8.18.0"   # CVE-2026-48779 ws@8.18.0
-    reason: "Frontend only, via ethers 5 (@ethersproject/providers). Its browser build is believed to use the native WebSocket instead of ws, but this is unverified (docs/findings/trivy.md); short expiry until it is checked in phase 8."
+    reason: "Frontend lockfile only, via ethers 5 (@ethersproject/providers 5.8.0). Not in the browser bundle (verified phase 8, 2026-10-24): the build's 3rdpartylicenses.txt lists 111 packages without ws, and none of ws's own strings (handshake GUID, permessage-deflate, WebSocketServer, Sec-WebSocket-Key) appear in the built JS; ethers' browser build aliases ws to the native WebSocket. Re-check if ethers or the Angular build changes."
     owner: quocthinhluu97
-    expires: 2026-11-30
+    expires: 2027-01-16
 
   # --- rule 4 ---
   - fingerprint: "code:semgrep:javascript.express.security.audit.remote-property-injection.remote-property-injection:app/routes/currentUser.ts:31"   # javascript.express.security.audit.remote-property-injection.remote-property-injection app/routes/currentUser.ts:31
